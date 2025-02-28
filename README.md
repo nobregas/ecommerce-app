@@ -17,6 +17,8 @@ npm run start
 - add / remove item quantity at the card
 - add name to signup
 - add checkout feature
+- refactor colors constants
+- refactor rest calls to service
 
 ## OBS
 

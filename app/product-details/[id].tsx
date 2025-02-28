@@ -12,7 +12,7 @@ import Animated, { FadeInDown, SlideInDown } from "react-native-reanimated";
 export default function ProductDetails() {
   const { id, productType } = useLocalSearchParams()
 
-  const [product, setProduct] = useState<ProductType>({})
+  const [product, setProduct] = useState<ProductType| null>(null)
   const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
