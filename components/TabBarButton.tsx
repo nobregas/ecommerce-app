@@ -1,0 +1,73 @@
+import { Colors } from "@/constants/Colors";
+import { icon } from "@/constants/icons";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native"
+
+type Props = {
+    onPress: () => void;
+    onLongPress: () => void;
+    isFocused: boolean;
+    label: string;
+    routeName: string
+}
+
+const TabBarButton = (props: Props) => {
+    const { onPress, onLongPress, isFocused, label, routeName } = props;
+
+    const [cartCount, setCartCount] = useState(0);
+
+    useEffect(() => {
+        const getCartCount = async () => {
+            const URL = `http://10.0.2.2:8000/cart`
+            const response = await axios.get(URL)
+            setCartCount(response.data.length)
+        }
+        getCartCount()
+    }, [])
+
+    return (
+        <Pressable
+            onPress={onPress}
+            onLongPress={onLongPress}
+            style={styles.tabBarButton}
+        >
+            {(routeName == "cart" && cartCount > 0) && (
+                < View style={styles.badgeWrapper}>
+                    <Text style={styles.badge}>{cartCount}</Text>
+                </View>
+            )
+            }
+            {/* Cart Badge */}
+            {icon[routeName]({ color: isFocused ? Colors.primary : Colors.black })}
+            <Text style={{ color: isFocused ? "#673ab7" : "#222" }}>
+                {label}
+            </Text>
+        </Pressable >
+    );
+}
+
+export default TabBarButton
+
+const styles = StyleSheet.create({
+    tabBarButton: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 5,
+    },
+    badgeWrapper: {
+        position: "absolute",
+        backgroundColor: Colors.highlight,
+        top: -5,
+        right: 20,
+        paddingVertical: 2,
+        paddingHorizontal: 6,
+        borderRadius: 10,
+        zIndex: 10,
+    },
+    badge: {
+        color: Colors.black,
+        fontSize: 12,
+    },
+});
