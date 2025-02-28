@@ -4,7 +4,7 @@
 
 To set up and run the project, execute the following commands:
 
-```sh
+```
 npm install
 npm run dev
 npm run start
