@@ -17,18 +17,21 @@ const CartScreen = (props: Props) => {
 
   useEffect(() => {
     fetchCartItems()
+    const interval = setInterval(fetchCartItems, 5000)
+
+    return () => clearInterval(interval)
   }, [])
 
   const fetchCartItems = async () => {
-      try {
-        const cartItemsData = await getCartItems()
-  
-        setCartItems(cartItemsData)
-  
-      } catch (error) {
-        console.log(error)
-      }
+    try {
+      const cartItemsData = await getCartItems()
+
+      setCartItems(cartItemsData)
+
+    } catch (error) {
+      console.log(error)
     }
+  }
 
   return (
     <>

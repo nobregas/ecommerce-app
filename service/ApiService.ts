@@ -42,3 +42,34 @@ export const getCartItems = async (): Promise<CartItemType[]> => {
     const response = await api.get('/cart');
     return response.data;
 }
+
+export const addToCart = async (product: ProductType) => {
+    try {
+        const cartItems = await getCartItems()
+        const existingItem = cartItems.find(item => item.id === product.id)
+
+        if (existingItem) {
+            await api.patch(`/cart/${existingItem.id}`, { quantity: existingItem.quantity + 1 })  
+        } else {
+            // verify if image is an array or a string and then get the first image or use a placeholder
+            const imageUrl = typeof product.images === "string"
+            ? product.images
+            : Array.isArray(product.images) && product.images.length > 0
+            ? product.images[0]
+            : "https://via.placeholder.com/150";
+
+            await api.post('/cart', {
+                id: product.id,
+                title: product.title,
+                price: product.price,
+                quantity: 1,
+                image: product.images || product.images[0]
+            })
+        }
+
+        return "Item added to cart successfully";
+    } catch (error) {
+        console.error(error)
+        throw error
+    }
+}

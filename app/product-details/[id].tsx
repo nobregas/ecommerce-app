@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import Animated, { FadeInDown, SlideInDown } from "react-native-reanimated";
-import { getProductDetails } from "@/service/ApiService";
+import { addToCart, getProductDetails } from "@/service/ApiService";
 
 export default function ProductDetails() {
   const { id, productType: productType } = useLocalSearchParams()
@@ -33,6 +33,15 @@ export default function ProductDetails() {
       setLoading(false);
     }
   };
+
+  const handleAddToCart = async () => {
+    try {
+      const response = await addToCart(product!);
+      alert(response);
+    } catch (error) {
+      alert("Error adding to cart");
+    }
+  }
 
 
 if (loading) {
@@ -173,6 +182,7 @@ return (
           styles.btn,
           { backgroundColor: Colors.white, borderColor: Colors.primary, borderWidth: 1 }
         ]}
+        onPress={handleAddToCart}
       >
         <Ionicons name="cart-outline" size={22} color={Colors.primary} />
         <Text style={[styles.btnTxt, { color: Colors.primary }]}>Add to Cart</Text>

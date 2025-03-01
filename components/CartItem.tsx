@@ -25,7 +25,7 @@ const CartItem = ({ item }: Props) => {
                         <TouchableOpacity style={styles.quantityControl}>
                             <Ionicons name="remove-outline" size={20} color={Colors.black} />
                         </TouchableOpacity>
-                        <Text style={styles.quantity}>1</Text>
+                        <Text style={styles.quantity}>{item.quantity}</Text>
                         <TouchableOpacity style={styles.quantityControl}>
                             <Ionicons name="add-outline" size={20} color={Colors.black} />
                         </TouchableOpacity>
