@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, View, KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
 import React from 'react'
 import { Link, router, Stack } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
@@ -10,18 +10,29 @@ type Props = {}
 
 const SignUpScreen = (props: Props) => {
   return (
-    <>
-      <Stack.Screen options={{
-        headerTitle: 'SignUp',
-        headerTitleAlign: 'center',
-        headerLeft: () => (
-          <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name='close' size={24} color={Colors.black} />
-          </TouchableOpacity>
-        )
-      }} />
-      <View style={styles.container}>
-        <Text style={styles.title} >Create an account</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1, paddingBottom: 60 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Stack.Screen options={{
+          headerTitle: 'SignUp',
+          headerTitleAlign: 'center',
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons name='close' size={24} color={Colors.black} />
+            </TouchableOpacity>
+          )
+        }} />
+        <Text style={styles.title}>Create an account</Text>
+        <InputField
+          placeholder='Full Name'
+          placeholderTextColor={Colors.gray}
+          autoCapitalize="words"
+        />
         <InputField
           placeholder='Email Address'
           placeholderTextColor={Colors.gray}
@@ -53,10 +64,11 @@ const SignUpScreen = (props: Props) => {
         </View>
 
         <View style={styles.divider} />
-
-        <SocialLoginButtons emailHref={"/signin"} />
-      </View>
-    </>
+        <View style={styles.socialLoginWrapper}>
+          <SocialLoginButtons emailHref={"/signin"} />
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   )
 }
 
@@ -64,11 +76,12 @@ export default SignUpScreen
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
+    flexGrow: 1,
+    justifyContent: 'flex-start',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: Colors.background
+    backgroundColor: Colors.background,
+    paddingBottom: 40,
   },
   title: {
     fontSize: 24,
@@ -102,17 +115,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.black,
     lineHeight: 24,
-
   },
   loginTxtSpan: {
     color: Colors.primary,
     fontWeight: "600",
-
   },
   divider: {
     borderTopColor: Colors.gray,
     borderTopWidth: StyleSheet.hairlineWidth,
     width: '30%',
     marginBottom: 30
+  },
+  socialLoginWrapper: {
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 20,
   }
-})
+});
