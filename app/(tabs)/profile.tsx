@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native'
 import React from 'react'
 import { useHeaderHeight } from '@react-navigation/elements'
-import { Stack } from 'expo-router'
+import { Link, Stack } from 'expo-router'
 import { Colors } from '@/constants/Colors'
 import { Ionicons } from '@expo/vector-icons'
 import { Image } from "expo-image"
@@ -49,10 +49,12 @@ const ProfileScreen = (props: Props) => {
             <Ionicons name="settings-outline" size={20} color={Colors.black} />
             <Text style={styles.btnText}>Settings</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button}>
-            <Ionicons name="log-out-outline" size={20} color={Colors.black} />
-            <Text style={styles.btnText}>Logout</Text>
-          </TouchableOpacity>
+          <Link href="/signin" asChild>
+            <TouchableOpacity style={styles.button}>
+              <Ionicons name="log-out-outline" size={20} color={Colors.black} />
+              <Text style={styles.btnText}>Logout</Text>
+            </TouchableOpacity>
+          </Link>
         </ScrollView>
       </View>
     </>
