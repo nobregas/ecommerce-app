@@ -699,6 +699,20 @@
       "price": 24,
       "quantity": 1,
       "image": "https://i.imgur.com/DMQHGA0.jpeg"
+    },
+    {
+      "id": "7",
+      "title": "Classic Comfort Drawstring Joggers",
+      "price": 79,
+      "quantity": 1,
+      "image": "https://i.imgur.com/mp3rUty.jpeg"
+    },
+    {
+      "id": "8",
+      "title": "Classic Red Jogger Sweatpants",
+      "price": 98,
+      "quantity": 1,
+      "image": "https://i.imgur.com/9LFjwpI.jpeg"
     }
   ],
   "notifications": [
