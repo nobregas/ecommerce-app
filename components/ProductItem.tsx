@@ -1,14 +1,15 @@
 import { Colors } from "@/constants/Colors";
-import { ProductType } from "@/types/type";
+import { ProductStrType, ProductType } from "@/types/type";
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
-import { View, Image, Text, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import { Image } from "expo-image"
 
 type Props = {
     item: ProductType;
     index: number
-    productType: "sale" | "regular"
+    productType: ProductStrType
 }
 
 const width = Dimensions.get("window").width - 40;

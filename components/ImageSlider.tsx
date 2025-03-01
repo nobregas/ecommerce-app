@@ -1,6 +1,8 @@
-import { View, FlatList, Image, StyleSheet, Dimensions, ViewToken } from 'react-native'
+import { View, FlatList, StyleSheet, Dimensions, ViewToken } from 'react-native'
 import React, { useRef, useState } from 'react'
 import Pagination from '@/components/Pagination'
+import { Image } from "expo-image"
+
 
 type Props = {
     images: string[]
@@ -16,17 +18,17 @@ const ImageSlider = ({ images }: Props) => {
         itemVisiblePercentThreshold: 50,
     }
 
-    const onViewableItemsChanged = ({ viewableItems } : {viewableItems: ViewToken[]}) => {
-        	if (
-                viewableItems[0].index !== undefined &&
-                 viewableItems[0].index !== null
-                ) {
-                    setPaginationIndex(viewableItems[0].index % images.length)
-                }
+    const onViewableItemsChanged = ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+        if (
+            viewableItems[0].index !== undefined &&
+            viewableItems[0].index !== null
+        ) {
+            setPaginationIndex(viewableItems[0].index % images.length)
+        }
     }
 
     const viewabilityConfigCallbackPairs = useRef([
-        {viewabilityConfig, onViewableItemsChanged}
+        { viewabilityConfig, onViewableItemsChanged }
     ])
 
     return (
@@ -44,7 +46,7 @@ const ImageSlider = ({ images }: Props) => {
                     </View>
                 )}
             />
-            <Pagination items={images} paginationIndex={paginationIndex}/>
+            <Pagination items={images} paginationIndex={paginationIndex} />
         </View>
     )
 }

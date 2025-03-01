@@ -1,9 +1,11 @@
-import { Image, StyleSheet, Text, View,TouchableOpacity, ScrollView } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native'
 import React from 'react'
 import { useHeaderHeight } from '@react-navigation/elements'
 import { Stack } from 'expo-router'
 import { Colors } from '@/constants/Colors'
 import { Ionicons } from '@expo/vector-icons'
+import { Image } from "expo-image"
+
 
 type Props = {}
 

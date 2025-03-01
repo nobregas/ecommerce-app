@@ -1,4 +1,4 @@
-import { FlatList, Image, StyleSheet, Text, View } from 'react-native'
+import { FlatList, StyleSheet, Text, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { CategoryType } from '@/types/type'
 import { Stack } from 'expo-router'
@@ -6,6 +6,7 @@ import { useHeaderHeight } from '@react-navigation/elements'
 import { Colors } from '@/constants/Colors'
 import Animated, { FadeInDown } from 'react-native-reanimated'
 import { getCategories } from '@/service/ApiService'
+import { Image } from "expo-image"
 
 type Props = {}
 

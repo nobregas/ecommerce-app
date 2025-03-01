@@ -1,7 +1,8 @@
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native'
 import React from 'react'
 import { CategoryType } from '@/types/type'
 import { Colors } from '@/constants/Colors'
+import { Image } from "expo-image"
 
 type Props = {
     categories: CategoryType[]

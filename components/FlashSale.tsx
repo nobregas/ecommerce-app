@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native'
 import { Colors } from '@/constants/Colors'
 import { Ionicons } from '@expo/vector-icons'
 import { useEffect, useState } from 'react'
@@ -73,10 +73,10 @@ const FlashSale = ({ products }: Props) => {
                 data={products}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{marginLeft: 20, paddingRight: 20}}
+                contentContainerStyle={{ marginLeft: 20, paddingRight: 20 }}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item, index }) => (
-                    <View style={{marginRight: 20}}>
+                    <View style={{ marginRight: 20 }}>
                         <ProductItem item={item} index={index} productType={productType} />
                     </View>
                 )}

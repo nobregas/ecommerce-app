@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ActivityIndicator, Image, ScrollView, StyleSheet, View, FlatList } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, View, FlatList } from 'react-native';
 import { Stack } from 'expo-router';
 import Header from '@/components/Header';
 import ProductList from '@/components/ProductList';
@@ -7,6 +7,8 @@ import { CategoryType, ProductType } from '@/types/type';
 import Categories from '@/components/Categories';
 import FlashSale from '@/components/FlashSale';
 import { getCategories, getSaleProducts, getProducts } from '@/service/ApiService';
+import { Image } from "expo-image"
+
 
 const HomeScreen = () => {
   const [products, setProducts] = useState<ProductType[]>([]);

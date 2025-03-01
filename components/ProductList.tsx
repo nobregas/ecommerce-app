@@ -1,19 +1,21 @@
+import React, { memo } from "react";
 import { View, TouchableOpacity, FlatList, Text, StyleSheet } from "react-native";
 import ProductItem from "./ProductItem";
-import { Colors } from "react-native/Libraries/NewAppScreen";
+import { Colors } from "@/constants/Colors";
 import { ProductType } from "@/types/type";
 
-
-
 type Props = {
-    products: ProductType[],
-    flatlist: boolean
-}
+    products: ProductType[];
+    flatlist?: boolean;
+};
 
-const productType = "regular"
+const productType = "regular";
 
-export default function ProductList({ products, flatlist = true }: Props) {
-    
+const ProductList = ({ products, flatlist = true }: Props) => {
+    const renderItem = ({ item, index }: { item: ProductType; index: number }) => (
+        <ProductItem item={item} index={index} productType={productType} />
+    );
+
     return (
         <View style={styles.container}>
             <View style={styles.titleWrapper}>
@@ -26,29 +28,26 @@ export default function ProductList({ products, flatlist = true }: Props) {
                 <FlatList
                     data={products}
                     numColumns={2}
-                    columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 20 }}
+                    columnWrapperStyle={styles.columnWrapper}
                     keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ index, item }) => (
-                        <ProductItem item={item} index={index} productType={productType}/>
-                    )}
+                    renderItem={renderItem}
                 />
             ) : (
                 <View style={styles.itemsWrapper}>
                     {products.map((item, index) => (
-                        <View key={index} style={styles.productWrapper}>
-                            <ProductItem item={item} index={index} productType={productType}/>
+                        <View key={item.id} style={styles.productWrapper}>
+                            <ProductItem item={item} index={index} productType={productType} />
                         </View>
                     ))}
                 </View>
             )}
-
         </View>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     container: {
-        marginHorizontal: 20
+        marginHorizontal: 20,
     },
     titleWrapper: {
         flexDirection: "row",
@@ -59,23 +58,29 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "600",
         letterSpacing: 0.6,
-        color: Colors.black
+        color: Colors.black,
     },
     titleBtn: {
         fontSize: 14,
         fontWeight: "500",
         letterSpacing: 0.6,
-        color: Colors.black
+        color: Colors.black,
     },
     itemsWrapper: {
         width: "100%",
         flexDirection: "row",
         flexWrap: "wrap",
-        alignItems: "stretch"
+        alignItems: "stretch",
     },
     productWrapper: {
         width: "50%",
         paddingLeft: 5,
         marginBottom: 20,
-    }
+    },
+    columnWrapper: {
+        justifyContent: "space-between",
+        marginBottom: 20,
+    },
 });
+
+export default memo(ProductList);
