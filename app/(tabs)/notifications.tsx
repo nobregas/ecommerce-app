@@ -3,10 +3,10 @@ import React, { useEffect, useState } from 'react'
 import { useHeaderHeight } from '@react-navigation/elements'
 import { Stack } from 'expo-router'
 import { NotificationType } from '@/types/type'
-import axios from 'axios'
 import { Ionicons } from '@expo/vector-icons'
 import { Colors } from '@/constants/Colors'
 import Animated, { FadeInDown } from 'react-native-reanimated'
+import { getNotifications } from '@/service/ApiService'
 
 type Props = {}
 
@@ -16,14 +16,20 @@ const NotificationsScreen = (props: Props) => {
   const [notifications, setNotifications] = useState<NotificationType[]>([])
 
   useEffect(() => {
-    getNotifications()
+    fetchNotifications()
   }, [])
 
-  const getNotifications = async () => {
-    const URL = `http://10.0.2.2:8000/notifications`
-    const response = await axios.get(URL)
-    setNotifications(response.data)
-  }
+  const fetchNotifications = async () => {
+      try {
+        const categoriesData = await getNotifications()
+  
+        setNotifications(categoriesData)
+  
+      } catch (error) {
+        console.log(error)
+      }
+    }
+  
 
   return (
     <>
