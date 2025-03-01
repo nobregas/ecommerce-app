@@ -8,6 +8,7 @@ import { ActivityIndicator, Text, View, StyleSheet, TouchableOpacity, ScrollView
 import { useHeaderHeight } from "@react-navigation/elements";
 import Animated, { FadeInDown, SlideInDown } from "react-native-reanimated";
 import { addToCart, getProductDetails } from "@/service/ApiService";
+import { useCartStore } from "@/store/cardBadgeStore";
 
 export default function ProductDetails() {
   const { id, productType: productType } = useLocalSearchParams()
@@ -18,7 +19,8 @@ export default function ProductDetails() {
 
   const [product, setProduct] = useState<ProductType | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
-
+  const { fetchCartCount } = useCartStore();
+  
   useEffect(() => {
     fetchProductDetails()
   }, [])
@@ -37,6 +39,7 @@ export default function ProductDetails() {
   const handleAddToCart = async () => {
     try {
       const response = await addToCart(product!, productTypeStr as ProductStrType);
+      fetchCartCount()
       alert(response);
     } catch (error) {
       alert("Error adding to cart");

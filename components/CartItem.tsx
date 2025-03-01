@@ -6,6 +6,7 @@ import { Colors } from '@/constants/Colors'
 import { Ionicons } from '@expo/vector-icons'
 import { Image } from "expo-image"
 import { Link } from 'expo-router'
+import { useCartStore } from '@/store/cardBadgeStore'
 
 
 type Props = {
@@ -16,6 +17,8 @@ type Props = {
 
 
 const CartItem = ({ item, updateQuantity, removeItem }: Props) => {
+    const { fetchCartCount } = useCartStore();
+
     const handleIncrement = async () => {
         await updateQuantity(item.id, item.quantity + 1)
     }
@@ -28,6 +31,7 @@ const CartItem = ({ item, updateQuantity, removeItem }: Props) => {
 
     const handleRemoveItem = async () => {
         await removeItem(item.id)
+        fetchCartCount()
     }
 
     return (

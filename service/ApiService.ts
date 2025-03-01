@@ -93,3 +93,14 @@ export const removeFromCart = async (id: number) => {
         throw error;
     }
 }
+
+export const getCartCount = async (): Promise<number> => {
+    try {
+        const URL = `http://10.0.2.2:8000/cart`;
+        const response = await axios.get(URL);
+        return response.data.length;
+    } catch (error) {
+        console.error("Failed to get cart count:", error);
+        return 0; 
+    }
+}

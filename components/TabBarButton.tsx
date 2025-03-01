@@ -1,8 +1,9 @@
 import { Colors } from "@/constants/Colors";
 import { icon } from "@/constants/icons";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { useCartStore } from "@/store/cardBadgeStore";
+
 import { Pressable, StyleSheet, Text, View } from "react-native"
+
 
 type Props = {
     onPress: () => void;
@@ -14,17 +15,7 @@ type Props = {
 
 const TabBarButton = (props: Props) => {
     const { onPress, onLongPress, isFocused, label, routeName } = props;
-
-    const [cartCount, setCartCount] = useState(0);
-
-    useEffect(() => {
-        const getCartCount = async () => {
-            const URL = `http://10.0.2.2:8000/cart`
-            const response = await axios.get(URL)
-            setCartCount(response.data.length)
-        }
-        getCartCount()
-    }, [])
+    const { cartCount } = useCartStore();
 
     return (
         <Pressable

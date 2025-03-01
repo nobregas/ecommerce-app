@@ -16,7 +16,6 @@ export default function TabLayout() {
       }} />
       <Tabs.Screen name='cart' options={{
         title: 'Cart',
-        tabBarBadge: 3,
       }} />
       <Tabs.Screen name='profile' options={{
         title: 'Profile',
