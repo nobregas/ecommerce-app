@@ -687,13 +687,6 @@
       "image": "https://i.imgur.com/w3Y8NwQ.jpeg"
     },
     {
-      "id": "3",
-      "title": "Sleek Smartwatch with Vibrant Display",
-      "price": 16,
-      "quantity": 1,
-      "image": "https://i.imgur.com/LGk9Jn2.jpeg"
-    },
-    {
       "id": "36",
       "title": "Rainbow Glitter High Heels",
       "price": 39,
@@ -704,7 +697,7 @@
       "id": "29",
       "title": "Mid-Century Modern Wooden Dining Table",
       "price": 24,
-      "quantity": 4,
+      "quantity": 1,
       "image": "https://i.imgur.com/DMQHGA0.jpeg"
     }
   ],

@@ -6,7 +6,7 @@ import { Stack } from 'expo-router'
 import CartItem from '@/components/CartItem'
 import { Colors } from '@/constants/Colors'
 import Animated, { FadeInDown, SlideInDown } from 'react-native-reanimated'
-import { getCartItems, updateQuantity } from '@/service/ApiService'
+import { getCartItems, removeFromCart, updateQuantity } from '@/service/ApiService'
 
 type Props = {}
 
@@ -47,6 +47,15 @@ const CartScreen = (props: Props) => {
     })
   }
 
+  const handleRemoveItem = async (id: number) => {
+    const removedItemId = await removeFromCart(id)
+
+    // Remove the cart item
+    setCartItems(prevItems => {
+      return prevItems.filter(item => item.id !== id)
+    })
+  }
+
   return (
     <>
       <Stack.Screen
@@ -58,7 +67,11 @@ const CartScreen = (props: Props) => {
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item, index }) => (
             <Animated.View entering={FadeInDown.delay(300 + index * 100).duration(500)}>
-              <CartItem item={item} updateQuantity={handleUpdateQuantity}/>
+              <CartItem 
+              item={item} 
+              updateQuantity={handleUpdateQuantity}
+              removeItem={handleRemoveItem}
+              />
             </Animated.View>
           )}
         />

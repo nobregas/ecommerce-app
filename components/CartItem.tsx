@@ -8,10 +8,11 @@ import { Ionicons } from '@expo/vector-icons'
 type Props = {
     item: CartItemType
     updateQuantity: (id: number, newQuantity: number) => void
+    removeItem: (id: number) => void
 }
 
 
-const CartItem = ({ item, updateQuantity }: Props) => {
+const CartItem = ({ item, updateQuantity, removeItem }: Props) => {
     const handleIncrement = async () => {
         await updateQuantity(item.id, item.quantity + 1)
     }
@@ -22,6 +23,10 @@ const CartItem = ({ item, updateQuantity }: Props) => {
         }
     }
 
+    const handleRemoveItem = async () => {
+        await removeItem(item.id)
+    }
+
     return (
         <View style={styles.container}>
             <Image source={{ uri: item.image }} style={styles.itemImg} />
@@ -29,7 +34,7 @@ const CartItem = ({ item, updateQuantity }: Props) => {
                 <Text style={styles.itemTxt}>{item.title}</Text>
                 <Text style={styles.itemTxt}>R${item.price}</Text>
                 <View style={styles.itemControlWrapper}>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={handleRemoveItem}>
                         <Ionicons name="trash-outline" size={20} color={"red"} />
                     </TouchableOpacity>
                     <View style={styles.quantityControlWrapper}>

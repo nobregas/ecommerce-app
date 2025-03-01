@@ -83,3 +83,13 @@ export const updateQuantity = async (id: number, newQuantity: number) => {
         throw error;
     }
 }
+
+export const removeFromCart = async (id: number) => {
+    try {
+        const response = await api.delete(`/cart/${id}`);
+        return id;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
