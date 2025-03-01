@@ -2,11 +2,11 @@ import { FlatList, StyleSheet, Text, Touchable, TouchableOpacity, View } from 'r
 import React, { useEffect, useState } from 'react'
 import { CartItemType } from '@/types/type'
 import { useHeaderHeight } from '@react-navigation/elements'
-import axios from 'axios'
 import { Stack } from 'expo-router'
 import CartItem from '@/components/CartItem'
 import { Colors } from '@/constants/Colors'
 import Animated, { FadeInDown, SlideInDown } from 'react-native-reanimated'
+import { getCartItems } from '@/service/ApiService'
 
 type Props = {}
 
@@ -16,14 +16,19 @@ const CartScreen = (props: Props) => {
   const [cartItems, setCartItems] = useState<CartItemType[]>([])
 
   useEffect(() => {
-    getCartItems()
+    fetchCartItems()
   }, [])
 
-  const getCartItems = async () => {
-    const URL = `http://10.0.2.2:8000/cart`
-    const response = await axios.get(URL)
-    setCartItems(response.data)
-  }
+  const fetchCartItems = async () => {
+      try {
+        const cartItemsData = await getCartItems()
+  
+        setCartItems(cartItemsData)
+  
+      } catch (error) {
+        console.log(error)
+      }
+    }
 
   return (
     <>
