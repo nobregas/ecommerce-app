@@ -10,10 +10,6 @@ npm run dev
 npm run start
 ```
 
-## TODO
-
-- fix render of card number of items at the tab
-
 ## OBS
 
 To test the UI for this ecommerce app was used virtual Pixel_8
