@@ -4,10 +4,10 @@ import Header from '@/components/Header'
 
 import ProductList from '@/components/ProductList'
 import { CategoryType, ProductType } from '@/types/type'
-import axios from 'axios'
 import { useState, useEffect } from 'react'
 import Categories from '@/components/Categories'
 import FlashSale from '@/components/FlashSale'
+import { getCategories, getSaleProducts, getProducts } from '@/service/ApiService'
 
 type Props = {}
 
@@ -19,35 +19,29 @@ const HomeScreen = (props: Props) => {
   const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
-    getCategories()
-    getSaleProducts()
-    getProducts()
+    fetchData()
   }, [])
 
-  const getProducts = async () => {
-    const URL = `http://10.0.2.2:8000/products`
-    const response = await axios.get(URL)
+  const fetchData = async () => {
+    try{
+      const[categoryData, saleProductData, productData] = await Promise.all([
+        getCategories(),
+        getSaleProducts(),
+        getProducts(),
+      ])
 
-    setProducts(response.data)
-    setLoading(false)
+      setCategories(categoryData)
+      setSaleProducts(saleProductData)
+      setProducts(productData)
+
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const getSaleProducts = async () => {
-    const URL = `http://10.0.2.2:8000/saleProducts`
-    const response = await axios.get(URL)
-
-    setSaleProducts(response.data)
-    setLoading(false)
-  }
-
-  const getCategories = async () => {
-    const URL = `http://10.0.2.2:8000/categories`
-    const response = await axios.get(URL)
-
-    setCategories(response.data)
-    setLoading(false)
-  }
-
+  
   if (loading) {
     return (
       <View>
