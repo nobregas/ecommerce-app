@@ -13,7 +13,6 @@ npm run start
 ## TODO
 
 - logout feature
-- add name to signup
 - add checkout feature
 - refactor colors constants
 
