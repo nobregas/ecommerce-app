@@ -2,11 +2,12 @@ import { FlatList, StyleSheet, Text, Touchable, TouchableOpacity, View } from 'r
 import React, { useEffect, useState } from 'react'
 import { CartItemType } from '@/types/type'
 import { useHeaderHeight } from '@react-navigation/elements'
-import { Stack } from 'expo-router'
+import { Link, Stack } from 'expo-router'
 import CartItem from '@/components/CartItem'
 import { Colors } from '@/constants/Colors'
 import Animated, { FadeInDown, SlideInDown } from 'react-native-reanimated'
 import { getCartItems, removeFromCart, updateQuantity } from '@/service/ApiService'
+import { getTotal } from '@/utils/sharedFunctions'
 
 type Props = {}
 
@@ -35,7 +36,7 @@ const CartScreen = (props: Props) => {
 
   const handleUpdateQuantity = async (id: number, newQuantity: number) => {
     const updatedItem = await updateQuantity(id, newQuantity)
-    
+
     // Update the quantity of an especific cart item
     setCartItems(prevItems => {
       return prevItems.map(item => {
@@ -56,14 +57,6 @@ const CartScreen = (props: Props) => {
     })
   }
 
-  const getTotal = () => {
-    let total = 0;
-    for (let i = 0; i < cartItems.length; i++) {
-      total += cartItems[i].price * cartItems[i].quantity   
-    }
-    return total.toFixed(2)
-  }
-
   return (
     <>
       <Stack.Screen
@@ -75,10 +68,10 @@ const CartScreen = (props: Props) => {
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item, index }) => (
             <Animated.View entering={FadeInDown.delay(300 + index * 100).duration(500)}>
-              <CartItem 
-              item={item} 
-              updateQuantity={handleUpdateQuantity}
-              removeItem={handleRemoveItem}
+              <CartItem
+                item={item}
+                updateQuantity={handleUpdateQuantity}
+                removeItem={handleRemoveItem}
               />
             </Animated.View>
           )}
@@ -86,11 +79,13 @@ const CartScreen = (props: Props) => {
       </View>
       <Animated.View style={styles.footer} entering={SlideInDown.delay(500).duration(500)}>
         <View style={styles.priceInfoWrapper}>
-          <Text style={styles.totalTxt}>Total: R${getTotal()}</Text>
+          <Text style={styles.totalTxt}>Total: R${getTotal(cartItems)}</Text>
         </View>
-        <TouchableOpacity style={styles.checkoutBtn}>
-          <Text style={styles.checkoutBtnTxt}>Checkout</Text>
-        </TouchableOpacity>
+        <Link href="/checkout" asChild>
+          <TouchableOpacity style={styles.checkoutBtn}>
+            <Text style={styles.checkoutBtnTxt}>Checkout</Text>
+          </TouchableOpacity>
+        </Link>
       </Animated.View>
     </>
   )
@@ -104,9 +99,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20
   },
   footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    width: '100%',
     flexDirection: 'row',
-    padding: 20,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
     backgroundColor: Colors.white,
+    borderTopWidth: 1,
+    borderTopColor: Colors.extraLightGray,
+    shadowColor: Colors.darkGray,
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
   },
   priceInfoWrapper: {
     flex: 1,

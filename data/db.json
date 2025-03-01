@@ -676,9 +676,49 @@
       "id": "29",
       "title": "Mid-Century Modern Wooden Dining Table",
       "price": 24,
-      "quantity": 1,
+      "quantity": 2,
       "image": "https://i.imgur.com/DMQHGA0.jpeg",
       "productType": "sale"
+    },
+    {
+      "id": "30",
+      "title": "Elegant Golden-Base Stone Top Dining Table",
+      "price": 66,
+      "quantity": 1,
+      "image": "https://i.imgur.com/NWIJKUj.jpeg",
+      "productType": "sale"
+    },
+    {
+      "id": "25",
+      "title": "Stylish Red & Silver Over-Ear Headphones",
+      "price": 39,
+      "quantity": 1,
+      "image": "https://i.imgur.com/YaSqa06.jpeg",
+      "productType": "regular"
+    },
+    {
+      "id": "26",
+      "title": "Sleek Mirror Finish Phone Case",
+      "price": 27,
+      "quantity": 1,
+      "image": "https://i.imgur.com/yb9UQKL.jpeg",
+      "productType": "regular"
+    },
+    {
+      "id": "33",
+      "title": "Modern Minimalist Workstation Setup",
+      "price": 49,
+      "quantity": 1,
+      "image": "https://i.imgur.com/3oXNBst.jpeg",
+      "productType": "regular"
+    },
+    {
+      "id": "27",
+      "title": "Sleek Smartwatch with Vibrant Display",
+      "price": 16,
+      "quantity": 1,
+      "image": "https://i.imgur.com/LGk9Jn2.jpeg",
+      "productType": "regular"
     }
   ],
   "notifications": [

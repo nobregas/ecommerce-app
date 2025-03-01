@@ -13,6 +13,7 @@ npm run start
 ## TODO
 
 - add checkout feature
+- fix render of card number of items at the tab
 
 ## OBS
 
