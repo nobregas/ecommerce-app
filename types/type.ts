@@ -33,3 +33,5 @@ export interface NotificationType {
   message: string;
   timestamp: string;
 }
+
+export type ProductStrType = "regular" | "sale";
