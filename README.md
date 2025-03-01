@@ -12,9 +12,7 @@ npm run start
 
 ## TODO
 
-- logout feature
 - add checkout feature
-- total cart feature
 
 ## OBS
 

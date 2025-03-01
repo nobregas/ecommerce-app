@@ -56,6 +56,14 @@ const CartScreen = (props: Props) => {
     })
   }
 
+  const getTotal = () => {
+    let total = 0;
+    for (let i = 0; i < cartItems.length; i++) {
+      total += cartItems[i].price * cartItems[i].quantity   
+    }
+    return total.toFixed(2)
+  }
+
   return (
     <>
       <Stack.Screen
@@ -78,7 +86,7 @@ const CartScreen = (props: Props) => {
       </View>
       <Animated.View style={styles.footer} entering={SlideInDown.delay(500).duration(500)}>
         <View style={styles.priceInfoWrapper}>
-          <Text style={styles.totalTxt}>Total: R$200</Text>
+          <Text style={styles.totalTxt}>Total: R${getTotal()}</Text>
         </View>
         <TouchableOpacity style={styles.checkoutBtn}>
           <Text style={styles.checkoutBtnTxt}>Checkout</Text>
