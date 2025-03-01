@@ -18,7 +18,6 @@ npm run start
 - add name to signup
 - add checkout feature
 - refactor colors constants
-- refactor rest calls to service
 
 ## OBS
 
