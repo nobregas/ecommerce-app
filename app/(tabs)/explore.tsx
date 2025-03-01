@@ -1,11 +1,11 @@
 import { FlatList, Image, StyleSheet, Text, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { CategoryType } from '@/types/type'
-import axios from 'axios'
 import { Stack } from 'expo-router'
 import { useHeaderHeight } from '@react-navigation/elements'
 import { Colors } from '@/constants/Colors'
 import Animated, { FadeInDown } from 'react-native-reanimated'
+import { getCategories } from '@/service/ApiService'
 
 type Props = {}
 
@@ -15,14 +15,18 @@ const ExploreScreen = (props: Props) => {
   const [categories, setCategories] = useState<CategoryType[]>([])
 
   useEffect(() => {
-    getCategories()
+    fetchCategories()
   }, [])
 
-  const getCategories = async () => {
-    const URL = `http://10.0.2.2:8000/categories`
-    const response = await axios.get(URL)
+  const fetchCategories = async () => {
+    try {
+      const categoriesData = await getCategories()
 
-    setCategories(response.data)
+      setCategories(categoriesData)
+
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   return (
