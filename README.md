@@ -15,6 +15,7 @@ npm run start
 - logout feature
 - add checkout feature
 - refactor colors constants
+- total cart feature
 
 ## OBS
 
