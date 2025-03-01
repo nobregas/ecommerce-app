@@ -36,7 +36,7 @@ export default function ProductDetails() {
 
   const handleAddToCart = async () => {
     try {
-      const response = await addToCart(product!);
+      const response = await addToCart(product!, productTypeStr as ProductStrType);
       alert(response);
     } catch (error) {
       alert("Error adding to cart");

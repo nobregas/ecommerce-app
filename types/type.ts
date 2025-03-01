@@ -25,6 +25,7 @@ export interface CartItemType {
   price: number;
   quantity: number;
   image: string;
+  productType: ProductStrType
 }
 
 export interface NotificationType {

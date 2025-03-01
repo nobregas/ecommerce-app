@@ -43,7 +43,7 @@ export const getCartItems = async (): Promise<CartItemType[]> => {
     return response.data;
 }
 
-export const addToCart = async (product: ProductType) => {
+export const addToCart = async (product: ProductType, productType: ProductStrType) => {
     try {
         const cartItems = await getCartItems()
         const existingItem = cartItems.find(item => item.id === product.id)
@@ -62,7 +62,8 @@ export const addToCart = async (product: ProductType) => {
                 title: product.title,
                 price: product.price,
                 quantity: 1,
-                image: imageUrl
+                image: imageUrl,
+                productType: productType
             })
         }
 

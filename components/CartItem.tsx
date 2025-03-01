@@ -5,6 +5,7 @@ import { CartItemType } from '@/types/type'
 import { Colors } from '@/constants/Colors'
 import { Ionicons } from '@expo/vector-icons'
 import { Image } from "expo-image"
+import { Link } from 'expo-router'
 
 
 type Props = {
@@ -30,30 +31,37 @@ const CartItem = ({ item, updateQuantity, removeItem }: Props) => {
     }
 
     return (
-        <View style={styles.container}>
-            <Image source={{ uri: item.image }} style={styles.itemImg} />
-            <View style={styles.itemInfoWrapper}>
-                <Text style={styles.itemTxt}>{item.title}</Text>
-                <Text style={styles.itemTxt}>R${item.price}</Text>
-                <View style={styles.itemControlWrapper}>
-                    <TouchableOpacity onPress={handleRemoveItem}>
-                        <Ionicons name="trash-outline" size={20} color={"red"} />
-                    </TouchableOpacity>
-                    <View style={styles.quantityControlWrapper}>
-                        <TouchableOpacity style={styles.quantityControl} onPress={handleDecrement}>
-                            <Ionicons name="remove-outline" size={20} color={Colors.black} />
+        <Link href={{
+            pathname: "/product-details/[id]",
+            params: { id: item.id, productType: item.productType }
+        }} asChild>
+            <TouchableOpacity>
+            <View style={styles.container}>
+                <Image source={{ uri: item.image }} style={styles.itemImg} />
+                <View style={styles.itemInfoWrapper}>
+                    <Text style={styles.itemTxt}>{item.title}</Text>
+                    <Text style={styles.itemTxt}>R${item.price}</Text>
+                    <View style={styles.itemControlWrapper}>
+                        <TouchableOpacity onPress={handleRemoveItem}>
+                            <Ionicons name="trash-outline" size={20} color={"red"} />
                         </TouchableOpacity>
-                        <Text style={styles.quantity}>{item.quantity}</Text>
-                        <TouchableOpacity style={styles.quantityControl} onPress={handleIncrement}>
-                            <Ionicons name="add-outline" size={20} color={Colors.black} />
+                        <View style={styles.quantityControlWrapper}>
+                            <TouchableOpacity style={styles.quantityControl} onPress={handleDecrement}>
+                                <Ionicons name="remove-outline" size={20} color={Colors.black} />
+                            </TouchableOpacity>
+                            <Text style={styles.quantity}>{item.quantity}</Text>
+                            <TouchableOpacity style={styles.quantityControl} onPress={handleIncrement}>
+                                <Ionicons name="add-outline" size={20} color={Colors.black} />
+                            </TouchableOpacity>
+                        </View>
+                        <TouchableOpacity>
+                            <Ionicons name="heart-outline" size={20} color={Colors.black} />
                         </TouchableOpacity>
                     </View>
-                    <TouchableOpacity>
-                        <Ionicons name="heart-outline" size={20} color={Colors.black} />
-                    </TouchableOpacity>
                 </View>
             </View>
-        </View>
+            </TouchableOpacity>
+        </Link>
     )
 }
 
