@@ -12,7 +12,7 @@ const Pagination = ({ items, paginationIndex }: Props) => {
         <View style={styles.container}>
             {items.map((item, index) => (
                 <View key={index} style={[styles.paginationDot, {
-                    backgroundColor: paginationIndex === index ? Colors.primary : "#ccc"
+                    backgroundColor: paginationIndex === index ? Colors.primary : Colors.mediumLightGray
                 }]} /> 
             ))}
             

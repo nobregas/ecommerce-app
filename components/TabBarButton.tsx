@@ -40,7 +40,7 @@ const TabBarButton = (props: Props) => {
             }
             {/* Cart Badge */}
             {icon[routeName]({ color: isFocused ? Colors.primary : Colors.black })}
-            <Text style={{ color: isFocused ? "#673ab7" : "#222" }}>
+            <Text style={{ color: isFocused ? Colors.secondary : Colors.darkGray }}>
                 {label}
             </Text>
         </Pressable >

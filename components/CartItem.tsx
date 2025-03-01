@@ -43,7 +43,7 @@ const CartItem = ({ item, updateQuantity, removeItem }: Props) => {
                     <Text style={styles.itemTxt}>R${item.price}</Text>
                     <View style={styles.itemControlWrapper}>
                         <TouchableOpacity onPress={handleRemoveItem}>
-                            <Ionicons name="trash-outline" size={20} color={"red"} />
+                            <Ionicons name="trash-outline" size={20} color={Colors.red} />
                         </TouchableOpacity>
                         <View style={styles.quantityControlWrapper}>
                             <TouchableOpacity style={styles.quantityControl} onPress={handleDecrement}>
