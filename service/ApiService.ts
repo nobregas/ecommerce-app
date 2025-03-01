@@ -1,4 +1,4 @@
-import { ProductStrType } from '@/types/type';
+import { CartItemType, CategoryType, NotificationType, ProductStrType, ProductType } from '@/types/type';
 import axios from 'axios';
 import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
@@ -18,22 +18,27 @@ export const getProductDetails = async (id: string, productType: ProductStrType)
     return response.data;
 }
 
-export const getProducts = async () => {
+export const getProducts = async (): Promise<ProductType[]> => {
     const response = await api.get('/products');
     return response.data;
 }
 
-export const getCategories = async () => {
+export const getCategories = async (): Promise<CategoryType[]> => {
     const response = await api.get('/categories');
     return response.data;
 }
 
-export const getSaleProducts = async () => {
+export const getSaleProducts = async (): Promise<ProductType[]> => {
     const response = await api.get('/saleProducts');
     return response.data;
 }
 
-export const getNotifications = async () => {
+export const getNotifications = async (): Promise<NotificationType[]> => {
     const response = await api.get('/notifications');
+    return response.data;
+}
+
+export const getCartItems = async (): Promise<CartItemType[]> => {
+    const response = await api.get('/cart');
     return response.data;
 }
