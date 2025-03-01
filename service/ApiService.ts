@@ -49,14 +49,14 @@ export const addToCart = async (product: ProductType) => {
         const existingItem = cartItems.find(item => item.id === product.id)
 
         if (existingItem) {
-            await api.patch(`/cart/${existingItem.id}`, { quantity: existingItem.quantity + 1 })  
+            await api.patch(`/cart/${existingItem.id}`, { quantity: existingItem.quantity + 1 })
         } else {
             // verify if image is an array or a string and then get the first image or use a placeholder
             const imageUrl = typeof product.images === "string"
-            ? product.images
-            : Array.isArray(product.images) && product.images.length > 0
-            ? product.images[0]
-            : "https://via.placeholder.com/150";
+                ? product.images
+                : Array.isArray(product.images) && product.images.length > 0
+                    ? product.images[0]
+                    : "https://via.placeholder.com/150";
 
             await api.post('/cart', {
                 id: product.id,
@@ -71,5 +71,15 @@ export const addToCart = async (product: ProductType) => {
     } catch (error) {
         console.error(error)
         throw error
+    }
+}
+
+export const updateQuantity = async (id: number, newQuantity: number) => {
+    try {
+        const response = await api.patch(`/cart/${id}`, { quantity: newQuantity });
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        throw error;
     }
 }

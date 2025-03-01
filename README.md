@@ -12,12 +12,12 @@ npm run start
 
 ## TODO
 
-- Add to card feature
 - logout feature
-- add / remove item quantity at the card
+- add / remove item quantity at the cart
 - add name to signup
 - add checkout feature
 - refactor colors constants
+- remove cart feature
 
 ## OBS
 
