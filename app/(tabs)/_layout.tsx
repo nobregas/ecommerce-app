@@ -12,7 +12,7 @@ export default function TabLayout() {
         title: 'Explore',
       }} />
       <Tabs.Screen name='notifications' options={{
-        title: 'Notification',
+        title: 'Alerts',
       }} />
       <Tabs.Screen name='cart' options={{
         title: 'Cart',

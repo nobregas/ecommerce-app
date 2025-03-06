@@ -671,7 +671,16 @@
       "image": "https://i.imgur.com/BG8J0Fj.jpg"
     }
   ],
-  "cart": [],
+  "cart": [
+    {
+      "id": "22",
+      "title": "Sleek Wireless Computer Mouse",
+      "price": 10,
+      "quantity": 2,
+      "image": "https://i.imgur.com/w3Y8NwQ.jpeg",
+      "productType": "regular"
+    }
+  ],
   "notifications": [
     {
       "id": "1",
