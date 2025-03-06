@@ -1,9 +1,7 @@
 import { CartItemType, CategoryType, NotificationType, ProductStrType, ProductType } from '@/types/type';
 import axios from 'axios';
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
-//const API_BASE_URL = 'http://10.0.2.2:8000';
-const API_BASE_URL = "http://10.5.3.169:8080"
+const API_BASE_URL = process.env.API_BASE_URL || 'http://10.0.2.2:8080';       
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -104,3 +102,18 @@ export const getCartCount = async (): Promise<number> => {
         return 0; 
     }
 }
+
+export const clearCart = async () => {
+    try {
+        const cartItems = await getCartItems();
+        
+        await Promise.all(
+            cartItems.map(item => removeFromCart(item.id))
+        );
+
+        return "Cart emptied successfully";
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+};
