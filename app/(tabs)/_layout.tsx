@@ -4,22 +4,37 @@ import TabBar from '@/components/TabBar';
 
 export default function TabLayout() {
   return (
-    <Tabs tabBar={props => <TabBar {...props} /> } screenOptions={{headerShown: false}}>
-      <Tabs.Screen name='index' options={{
-        title: 'Home',
-      }} />
-      <Tabs.Screen name='explore' options={{
-        title: 'Explore',
-      }} />
-      <Tabs.Screen name='notifications' options={{
-        title: 'Alerts',
-      }} />
-      <Tabs.Screen name='cart' options={{
-        title: 'Cart',
-      }} />
-      <Tabs.Screen name='profile' options={{
-        title: 'Profile',
-      }} />
+    <Tabs tabBar={props => <TabBar {...props} />} screenOptions={{headerShown: false}}>
+      <Tabs.Screen 
+        name='index' 
+        options={{
+          tabBarLabel: 'Home', 
+        }} 
+      />
+      <Tabs.Screen 
+        name='explore' 
+        options={{
+          tabBarLabel: 'Explore',
+        }} 
+      />
+      <Tabs.Screen 
+        name='notifications' 
+        options={{
+          tabBarLabel: 'Alerts',
+        }} 
+      />
+      <Tabs.Screen 
+        name='cart' 
+        options={{
+          tabBarLabel: 'Cart',
+        }} 
+      />
+      <Tabs.Screen 
+        name='profile' 
+        options={{
+          tabBarLabel: 'Profile',
+        }} 
+      />
     </Tabs>
   );
 }

@@ -5,7 +5,7 @@ import { Colors } from '@/constants/Colors'
 import { Stack, useNavigation } from 'expo-router'
 import { useHeaderHeight } from '@react-navigation/elements'
 import { CartItemType } from '@/types/type'
-import { getCartItems } from '@/service/ApiService'
+import { clearCart, getCartItems } from '@/service/ApiService'
 import { Image } from 'expo-image'
 import Animated, { SlideInDown } from 'react-native-reanimated'
 
@@ -33,8 +33,12 @@ const CheckoutScreen = (props: Props) => {
 
     const handlePlaceOrder = async () => {
         try {
+
+            await clearCart()
+
             // logic to place the order
             Alert.alert("Order Placed", "Your order has been successfully placed.");
+
             navigation.goBack()
 
         } catch (error) {

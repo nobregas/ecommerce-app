@@ -81,7 +81,7 @@ const CartScreen = (props: Props) => {
         <View style={styles.priceInfoWrapper}>
           <Text style={styles.totalTxt}>Total: R${getTotal(cartItems)}</Text>
         </View>
-        <Link href="/checkout" asChild>
+        <Link href="/checkout/index" asChild>
           <TouchableOpacity style={styles.checkoutBtn}>
             <Text style={styles.checkoutBtnTxt}>Checkout</Text>
           </TouchableOpacity>
