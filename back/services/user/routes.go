@@ -2,6 +2,7 @@ package user
 
 import (
 	"fmt"
+	"log"
 
 	"net/http"
 
@@ -90,6 +91,7 @@ func (h *Handler) HandleRegister(w http.ResponseWriter, r *http.Request) {
 
 	// check if the user exists
 	_, err := h.store.GetUserByEmail(payload.Email)
+	log.Println(payload.Email)
 	if err == nil {
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("email with email %s already exists", payload.Email))
 		return

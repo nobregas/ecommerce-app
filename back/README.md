@@ -1,4 +1,5 @@
 todos:
+    validate cpf in registering
     auth for all endpoints
     role middleware
     all CRUDS

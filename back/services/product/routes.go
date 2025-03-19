@@ -21,11 +21,12 @@ func NewHandler(store types.ProductStore, userStore types.UserStore) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
-	// public routes
-	router.HandleFunc("/product", h.handleGetProducts).Methods("GET")
+	// user routes
+	router.HandleFunc("/product", auth.WithJwtAuth(h.handleGetProducts, h.userStore)).Methods("GET")
 
 	// admin routes
-	router.HandleFunc("/product", auth.WithJwtAuth(h.handleCreateProduct, h.userStore)).Methods("POST")
+	router.HandleFunc("/product", auth.WithJwtAuth(
+		auth.WithRoleAuth("ADMIN", h.handleCreateProduct), h.userStore)).Methods("POST")
 }
 
 func (h *Handler) handleGetProducts(w http.ResponseWriter, r *http.Request) {
