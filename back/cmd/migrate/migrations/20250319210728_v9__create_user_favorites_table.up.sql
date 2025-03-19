@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS user_favorites (
+  `userId` INT UNSIGNED NOT NULL,
+  `productId` INT UNSIGNED NOT NULL,
+  `addedAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (`userId`, `productId`),
+  FOREIGN KEY (`userId`) REFERENCES users(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`productId`) REFERENCES products(`id`) ON DELETE CASCADE
+);

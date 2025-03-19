@@ -1,0 +1,18 @@
+export const Colors = {
+  primary: '#572fff',
+  secondary: "#673ab7",
+  darkGray: '#222',
+  black: '#333',
+  gray: '#666',
+  lightGray: '#999',
+  extraLightGray: '#e4e4e4',
+  mediumLightGray: "#ccc",
+  white: '#fff',
+  background: '#F4F4F4',
+  highlight: '#F4CE14',
+  yellow: "#D4AF37",
+  red: "red",
+  transparentWhite: "rgba(255, 255, 255, 0.6)",
+  semiTransparentWhite: "rgba(255, 255, 255, 0.9)",
+  solidWhite: "rgba(255, 255, 255, 1)",
+}

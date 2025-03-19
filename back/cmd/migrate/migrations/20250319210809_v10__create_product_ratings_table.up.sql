@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS product_ratings (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `userId` INT UNSIGNED NOT NULL,
+  `productId` INT UNSIGNED NOT NULL,
+  `rating` TINYINT UNSIGNED NOT NULL,
+  `comment` TEXT,
+  `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (`id`),
+  UNIQUE KEY (`userId`, `productId`),
+  FOREIGN KEY (`userId`) REFERENCES users(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`productId`) REFERENCES products(`id`) ON DELETE CASCADE,
+  CHECK (`rating` BETWEEN 1 AND 5)
+);

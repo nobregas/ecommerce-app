@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS product_images (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `productId` INT UNSIGNED NOT NULL,
+  `imageUrl` VARCHAR(512) NOT NULL,
+  `sortOrder` INT NOT NULL DEFAULT 0,
+
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`productId`) REFERENCES products(`id`) ON DELETE CASCADE
+);
