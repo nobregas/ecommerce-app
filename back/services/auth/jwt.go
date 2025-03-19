@@ -16,14 +16,18 @@ import (
 
 type contextKey string
 
-const UserKey contextKey = "userId"
+const (
+	UserKey     contextKey = "userId"
+	UserRoleKey contextKey = "userRole"
+)
 
-func CreateJWT(secret []byte, userId int) (string, error) {
+func CreateJWT(secret []byte, userId int, userRole string) (string, error) {
 	expiration := time.Second * time.Duration(configs.Envs.JWTExpirationInSeconds)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userId":    strconv.Itoa(userId),
 		"expiredAt": time.Now().Add(expiration).Unix(),
+		"userRole":  userRole,
 	})
 
 	tokenString, err := token.SignedString(secret)
@@ -32,6 +36,21 @@ func CreateJWT(secret []byte, userId int) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+func WithRoleAuth(requiredRole string, handlerFunc http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// get the user role from context
+		userRole := getUserRoleFromContext(r.Context())
+
+		// check if the user has the required role
+		if userRole != requiredRole {
+			permissionDenied(w)
+			return
+		}
+
+		handlerFunc(w, r)
+	}
 }
 
 func WithJwtAuth(handlerFunc http.HandlerFunc, store types.UserStore) http.HandlerFunc {
@@ -101,4 +120,13 @@ func GetUserIdFromContext(ctx context.Context) int {
 	}
 
 	return userID
+}
+
+func getUserRoleFromContext(ctx context.Context) string {
+	role, ok := ctx.Value(UserRoleKey).(string)
+	if !ok {
+		return ""
+	}
+
+	return role
 }
