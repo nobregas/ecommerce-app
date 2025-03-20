@@ -289,6 +289,31 @@ func (s *Store) UpdateProduct(productID int, payload types.UpdateProductPayload)
 }
 
 func (s *Store) DeleteProduct(productID int) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	// deletes product
+	result, err := tx.Exec("DELETE FROM products WHERE id = ?", productID)
+	if err != nil {
+		return fmt.Errorf("failed to delete product: %w", err)
+	}
+
+	// verify if product exists
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to check rows affected: %w", err)
+	}
+	if rowsAffected == 0 {
+		return sql.ErrNoRows // product not found
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	return nil
 }
 

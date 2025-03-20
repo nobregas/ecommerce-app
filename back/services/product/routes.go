@@ -34,6 +34,9 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 
 	router.HandleFunc("/product/{productID}", auth.WithJwtAuth(
 		auth.WithAdminAuth(h.handleUpdateProductByID), h.userStore)).Methods(http.MethodPatch)
+
+	router.HandleFunc("/product/{productID}", auth.WithJwtAuth(
+		auth.WithAdminAuth(h.handleDeleteProduct), h.userStore)).Methods(http.MethodDelete)
 }
 
 func (h *Handler) handleGetProducts(w http.ResponseWriter, r *http.Request) {
@@ -101,17 +104,9 @@ func (h *Handler) handleCreateProductWithImages(w http.ResponseWriter, r *http.R
 
 func (h *Handler) handleUpdateProductByID(w http.ResponseWriter, r *http.Request) {
 	// get product id
-	vars := mux.Vars(r)
-	str, ok := vars["productID"]
-	if !ok {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing productID"))
-		return
-	}
-
-	// convert product id to str
-	productID, err := strconv.Atoi(str)
+	productID, err := getProductIdfromPath(r)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid productID"))
+		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
 
@@ -150,4 +145,44 @@ func (h *Handler) handleUpdateProductByID(w http.ResponseWriter, r *http.Request
 	}
 
 	utils.WriteJson(w, http.StatusOK, updatedProduct)
+}
+
+func (h *Handler) handleDeleteProduct(w http.ResponseWriter, r *http.Request) {
+	// get product id
+	productID, err := getProductIdfromPath(r)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	// verify if product exists
+	_, err = h.store.GetProductByID(productID)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("product with id %d not found", productID))
+		return
+	}
+
+	// delete product
+	if err := h.store.DeleteProduct(productID); err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.WriteJson(w, http.StatusNoContent, nil)
+}
+
+func getProductIdfromPath(r *http.Request) (int, error) {
+	// get product id
+	vars := mux.Vars(r)
+	str, ok := vars["productID"]
+	if !ok {
+		return -1, fmt.Errorf("missing productID")
+	}
+
+	// convert product id to str
+	productID, err := strconv.Atoi(str)
+	if err != nil {
+		return -1, fmt.Errorf("invalid productID")
+	}
+	return productID, nil
 }
