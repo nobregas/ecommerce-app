@@ -38,7 +38,9 @@ func CreateJWT(secret []byte, userId int, userRole string) (string, error) {
 	return tokenString, nil
 }
 
-func WithRoleAuth(requiredRole string, handlerFunc http.HandlerFunc) http.HandlerFunc {
+func WithAdminAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
+	const requiredRole = "ADMIN"
+
 	return func(w http.ResponseWriter, r *http.Request) {
 		// get the user role from context
 		userRole := getUserRoleFromContext(r.Context())
@@ -85,10 +87,10 @@ func WithJwtAuth(handlerFunc http.HandlerFunc, store types.UserStore) http.Handl
 			return
 		}
 
-		// set context "userID" to the user ID
-
+		// set context "userID" to the user ID and "userRole"
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, UserKey, u.ID)
+		ctx = context.WithValue(ctx, UserRoleKey, u.Role)
 		r = r.WithContext(ctx)
 
 		handlerFunc(w, r)

@@ -26,7 +26,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 
 	// admin routes
 	router.HandleFunc("/product", auth.WithJwtAuth(
-		auth.WithRoleAuth("ADMIN", h.handleCreateProduct), h.userStore)).Methods("POST")
+		auth.WithAdminAuth(h.handleCreateProduct), h.userStore)).Methods("POST")
 }
 
 func (h *Handler) handleGetProducts(w http.ResponseWriter, r *http.Request) {
