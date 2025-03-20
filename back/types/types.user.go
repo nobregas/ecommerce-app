@@ -17,8 +17,8 @@ type User struct {
 	Role       UserRole  `json:"role" validate:"required,oneof=USER ADMIN"`
 	ProfileImg string    `json:"profileImg"`
 	Password   string    `json:"-"`
-	CreatedAt  time.Time `json: "createdAt"`
-	UpdatedAt  time.Time `json: "updatedAt"`
+	CreatedAt  time.Time `json:"createdAt"`
+	UpdatedAt  time.Time `json:"updatedAt"`
 }
 
 type RegisterUserPayload struct {
