@@ -7,18 +7,28 @@ type ProductStore interface {
 	CreateProduct(CreateProductPayload) error
 	GetProductByID(productID int) (*Product, error)
 	CreateProductWithImages(CreateProductWithImagesPayload) (*Product, error)
+	UpdateStock(productID int, quantityChange int) error
+	GetInventory(productID int) (*Inventory, error)
+	GetImagesForProducts(productIDs []int) (map[int][]ProductImage, error)
 }
 
 type Product struct {
-	ID            int            `json:"id"`
-	Title         string         `json:"title"`
-	Description   string         `json:"description"`
-	BasePrice     float64        `json:"basePrice"`
-	StockQuantity int            `json:"stockQuantity"`
-	Images        []ProductImage `json:"images"`
-	CreatedAt     time.Time      `json:"createdAt"`
-	UpdatedAt     time.Time      `json:"updatedAt"`
+	ID          int            `json:"id"`
+	Title       string         `json:"title"`
+	Description string         `json:"description"`
+	BasePrice   float64        `json:"basePrice"`
+	Inventory   Inventory      `json:"inventory"`
+	Images      []ProductImage `json:"images"`
+	CreatedAt   time.Time      `json:"createdAt"`
+	UpdatedAt   time.Time      `json:"updatedAt"`
 }
+
+type Inventory struct {
+	ProductID     int `json:"productId"`
+	StockQuantity int `json:"stockQuantity"`
+	Version       int `json:"-"`
+}
+
 type ProductImage struct {
 	ID        int    `json:"id"`
 	ProductID int    `json:"productId"`

@@ -119,6 +119,32 @@ func TestProductServiceHandlers(t *testing.T) {
 	})
 }
 
+/*
+func TestGetInventory (t *testing.T) {
+	db := setupTestDB()
+	store := NewStore(db)
+
+	t.Run("should return valid inventory", func(t *testing.T) {
+        // Setup
+        _, err := db.Exec("INSERT INTO inventory (product_id, stock_quantity) VALUES (1, 100)")
+        require.NoError(t, err)
+
+        // Test
+        inv, err := store.GetInventory(1)
+
+        // Verify
+        assert.NoError(t, err)
+        assert.Equal(t, 1, inv.ProductID)
+        assert.Equal(t, 100, inv.StockQuantity)
+    })
+
+    t.Run("should return error for non-existent product", func(t *testing.T) {
+        _, err := store.GetInventory(999)
+        assert.ErrorContains(t, err, "not found")
+    })
+}
+*/
+
 type mockProductStore struct{}
 
 func (m *mockProductStore) GetProductByID(productID int) (*types.Product, error) {
@@ -134,6 +160,15 @@ func (m *mockProductStore) CreateProduct(product types.CreateProductPayload) err
 }
 
 func (m *mockProductStore) CreateProductWithImages(product types.CreateProductWithImagesPayload) (*types.Product, error) {
+	return nil, nil
+}
+
+func (m *mockProductStore) GetImagesForProducts(productIDs []int) (map[int][]types.ProductImage, error)
+
+func (m *mockProductStore) UpdateStock(productID int, quantityChange int) error {
+	return nil
+}
+func (m *mockProductStore) GetInventory(productID int) (*types.Inventory, error) {
 	return nil, nil
 }
 

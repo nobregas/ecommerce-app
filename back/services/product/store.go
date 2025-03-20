@@ -2,6 +2,8 @@ package product
 
 import (
 	"database/sql"
+	"fmt"
+	"strings"
 
 	"github.com/nobregas/ecommerce-mobile-back/types"
 )
@@ -15,34 +17,92 @@ func NewStore(db *sql.DB) *Store {
 }
 
 func (s *Store) GetProducts() ([]*types.Product, error) {
-	rows, err := s.db.Query("SELECT * FROM products")
+	// find products
+	rows, err := s.db.Query(
+		`SELECT p.*, i.stock_quantity, i.version
+		FROM products p
+		INNER JOIN inventory i ON p.id = i.product_id
+		`)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get products: %w", err)
 	}
+	defer rows.Close()
 
+	// get products and their inventory
+	productIds := make([]int, 0)
 	products := make([]*types.Product, 0)
 	for rows.Next() {
 		p, err := scanRowsIntoProduct(rows)
 		if err != nil {
 			return nil, err
 		}
-
+		productIds = append(productIds, p.ID)
 		products = append(products, p)
+	}
+
+	// find images
+	if len(productIds) > 0 {
+		images, err := s.GetImagesForProducts(productIds)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get images: %w", err)
+		}
+
+		for _, p := range products {
+			p.Images = images[p.ID]
+		}
 	}
 
 	return products, nil
 }
 
+func (s *Store) GetImagesForProducts(productIDs []int) (map[int][]types.ProductImage, error) {
+	query := `
+        SELECT id, productId, imageUrl, sortOrder 
+        FROM product_images 
+        WHERE productId IN (?` + strings.Repeat(",?", len(productIDs)-1) + `)`
+
+	args := make([]interface{}, len(productIDs))
+	for i, id := range productIDs {
+		args[i] = id
+	}
+
+	rows, err := s.db.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query images: %w", err)
+	}
+	defer rows.Close()
+
+	imagesMap := make(map[int][]types.ProductImage)
+
+	for rows.Next() {
+		var img types.ProductImage
+		err := rows.Scan(&img.ID, &img.ProductID, &img.ImageUrl, &img.SortOrder)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan image: %w", err)
+		}
+		imagesMap[img.ProductID] = append(imagesMap[img.ProductID], img)
+	}
+
+	return imagesMap, nil
+}
+
 func (s *Store) GetProductByID(productID int) (*types.Product, error) {
 	// find products
-	row := s.db.QueryRow("SELECT * FROM products WHERE id = ?", productID)
+	row := s.db.QueryRow(`SELECT * FROM products WHERE id = ?`, productID)
 	product, err := scanRowIntoProduct(row)
 	if err != nil {
 		return nil, err
 	}
 
+	// find inventory
+	inv, err := s.GetInventory(productID)
+	if err != nil {
+		return nil, err
+	}
+	product.Inventory = *inv
+
 	// find images
-	rows, err := s.db.Query("SELECT * FROM product_images WHERE productId = ?", productID)
+	rows, err := s.db.Query(`SELECT * FROM product_images WHERE productId = ?`, productID)
 	if err != nil {
 		return nil, err
 	}
@@ -61,14 +121,37 @@ func (s *Store) GetProductByID(productID int) (*types.Product, error) {
 }
 
 func (s *Store) CreateProduct(product types.CreateProductPayload) error {
-	_, err := s.db.Exec(
-		"INSERT INTO products (title, description, basePrice, stockQuantity) VALUES (?, ?, ?, ?)",
-		product.Title, product.Description, product.BasePrice, product.StockQuantity)
+	// create transaction
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// create product
+	res, err := tx.Exec(
+		`INSERT INTO products (title, description, basePrice) VALUES (?, ?, ?)`,
+		product.Title, product.Description, product.BasePrice)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	// get product id
+	productID, err := res.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	// create inventory
+	_, err = tx.Exec(
+		`INSERT INTO inventory (product_id, stock_quantity) VALUES (?, ?)`,
+		productID, product.StockQuantity,
+	)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func (s *Store) CreateProductWithImages(payload types.CreateProductWithImagesPayload) (*types.Product, error) {
@@ -80,14 +163,24 @@ func (s *Store) CreateProductWithImages(payload types.CreateProductWithImagesPay
 
 	// create product
 	res, err := tx.Exec(
-		"INSERT INTO products (title, description, basePrice, stockQuantity) VALUES (?, ?, ?, ?)",
-		payload.Title, payload.Description, payload.BasePrice, payload.StockQuantity,
+		`INSERT INTO products (title, description, basePrice) VALUES (?, ?, ?)`,
+		payload.Title, payload.Description, payload.BasePrice,
 	)
 	if err != nil {
 		return nil, err
 	}
 
+	// get product id
 	productID, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	// create inventory
+	_, err = tx.Exec(
+		`INSERT INTO inventory (product_id, stock_quantity) VALUES (?, ?)`,
+		productID, payload.StockQuantity,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +188,7 @@ func (s *Store) CreateProductWithImages(payload types.CreateProductWithImagesPay
 	// create product images
 	for _, img := range payload.Images {
 		_, err := tx.Exec(
-			"INSERT INTO product_images (productId, imageUrl, sortOrder) VALUES (?, ?, ?)",
+			`INSERT INTO product_images (productId, imageUrl, sortOrder) VALUES (?, ?, ?)`,
 			productID, img.ImageUrl, img.SortOrder,
 		)
 		if err != nil {
@@ -112,6 +205,62 @@ func (s *Store) CreateProductWithImages(payload types.CreateProductWithImagesPay
 	return s.GetProductByID(int(productID))
 }
 
+func (s *Store) UpdateStock(productID int, quantityChange int) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	var currentStock, version int
+	err = tx.QueryRow(
+		`SELECT stock_quantity, version FROM inventory WHERE product_id = ? FOR UPDATE`,
+		productID,
+	).Scan(&currentStock, &version)
+	if err != nil {
+		return err
+	}
+
+	newStock := currentStock + quantityChange
+	if newStock < 0 {
+		return fmt.Errorf("insufficient stock")
+	}
+
+	_, err = tx.Exec(
+		`UPDATE inventory SET stock_quantity = ?, version = version + 1 WHERE product_id = ? AND version = ?`,
+		newStock, productID, version,
+	)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func (s *Store) GetInventory(productID int) (*types.Inventory, error) {
+	const query = `
+        SELECT product_id, stock_quantity, version 
+        FROM inventory 
+        WHERE product_id = ?
+    `
+
+	var inventory types.Inventory
+
+	err := s.db.QueryRow(query, productID).Scan(
+		&inventory.ProductID,
+		&inventory.StockQuantity,
+		&inventory.Version,
+	)
+	switch {
+	case err == sql.ErrNoRows:
+		return nil, fmt.Errorf("inventory not found for product ID %d", productID)
+	case err != nil:
+		return nil, fmt.Errorf("failed to get inventory: %w", err)
+	}
+
+	return &inventory, nil
+}
+
 func scanRowsIntoProduct(rows *sql.Rows) (*types.Product, error) {
 	product := new(types.Product)
 
@@ -120,13 +269,15 @@ func scanRowsIntoProduct(rows *sql.Rows) (*types.Product, error) {
 		&product.Title,
 		&product.Description,
 		&product.BasePrice,
-		&product.StockQuantity,
 		&product.CreatedAt,
 		&product.UpdatedAt,
+		&product.Inventory.StockQuantity,
+		&product.Inventory.Version,
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to scan product: %w", err)
 	}
+	product.Inventory.ProductID = product.ID
 
 	return product, nil
 }
@@ -138,7 +289,6 @@ func scanRowIntoProduct(row *sql.Row) (*types.Product, error) {
 		&product.Title,
 		&product.Description,
 		&product.BasePrice,
-		&product.StockQuantity,
 		&product.CreatedAt,
 		&product.UpdatedAt,
 	)

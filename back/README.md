@@ -1,5 +1,4 @@
 todos:
-    can create a product with images
     all CRUDS
     pagination
     get products by category
