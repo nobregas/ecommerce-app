@@ -133,6 +133,10 @@ func (m *mockProductStore) CreateProduct(product types.CreateProductPayload) err
 	return nil
 }
 
+func (m *mockProductStore) CreateProductWithImages(product types.CreateProductWithImagesPayload) (*types.Product, error) {
+	return nil, nil
+}
+
 type mockUserStore struct{}
 
 func (s *mockUserStore) GetUserByCPF(cpf string) (*types.User, error) {

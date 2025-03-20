@@ -27,6 +27,9 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 	// admin routes
 	router.HandleFunc("/product", auth.WithJwtAuth(
 		auth.WithAdminAuth(h.handleCreateProduct), h.userStore)).Methods("POST")
+
+	router.HandleFunc("/product-with-images", auth.WithJwtAuth(
+		auth.WithAdminAuth(h.handleCreateProductWithImages), h.userStore)).Methods("POST")
 }
 
 func (h *Handler) handleGetProducts(w http.ResponseWriter, r *http.Request) {
@@ -64,4 +67,30 @@ func (h *Handler) handleCreateProduct(w http.ResponseWriter, r *http.Request) {
 
 	// response
 	utils.WriteJson(w, http.StatusCreated, product)
+}
+
+func (h *Handler) handleCreateProductWithImages(w http.ResponseWriter, r *http.Request) {
+	var payload types.CreateProductWithImagesPayload
+
+	// get json
+	if err := utils.ParseJson(r, &payload); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	// validate
+	if err := utils.Validate.Struct(payload); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload: %v", err))
+		return
+	}
+
+	// create product
+	createdProduct, err := h.store.CreateProductWithImages(payload)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	// response
+	utils.WriteJson(w, http.StatusCreated, createdProduct)
 }
