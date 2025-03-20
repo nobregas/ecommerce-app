@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/nobregas/ecommerce-mobile-back/services/category"
 	"github.com/nobregas/ecommerce-mobile-back/services/product"
 	"github.com/nobregas/ecommerce-mobile-back/services/user"
 )
@@ -35,6 +36,11 @@ func (s *APIServer) Run() error {
 	productStore := product.NewStore(s.db)
 	productHandler := product.NewHandler(productStore, userStore)
 	productHandler.RegisterRoutes(subrouter)
+
+	// category
+	categoryStore := category.NewStore(s.db)
+	categoryHandler := category.NewHandler(categoryStore)
+	categoryHandler.RegisterRoutes(subrouter)
 
 	log.Printf("Server listening on %s", s.addr)
 
