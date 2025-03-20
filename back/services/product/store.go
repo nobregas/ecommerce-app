@@ -261,6 +261,181 @@ func (s *Store) GetInventory(productID int) (*types.Inventory, error) {
 	return &inventory, nil
 }
 
+func (s *Store) UpdateProduct(productID int, payload types.UpdateProductPayload) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// update product data
+	if err := updateProductDetails(tx, productID, payload); err != nil {
+		return err
+	}
+
+	// update images
+	if payload.Images != nil {
+		if err := updateProductImages(tx, productID, payload.Images); err != nil {
+			return err
+		}
+	}
+
+	// commit transaction
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Store) DeleteProduct(productID int) error {
+	return nil
+}
+
+func updateProductImages(tx *sql.Tx, productID int, images []types.ImageUpdatePayload) error {
+	// get current images
+	currentImages, err := getCurrentImages(tx, productID)
+	if err != nil {
+		return err
+	}
+
+	toDelete := make([]int, 0)
+	toUpdate := make([]types.ImageUpdatePayload, 0)
+	toCreate := make([]types.ImageUpdatePayload, 0)
+
+	// aux map for received images (consider imageUrl + sortOrder as key)
+	receivedImageMap := make(map[string]types.ImageUpdatePayload)
+	for _, img := range images {
+		key := fmt.Sprintf("%s|%d", img.ImageUrl, img.SortOrder)
+		receivedImageMap[key] = img
+	}
+
+	// process current images
+	for currentID, currentImg := range currentImages {
+		key := fmt.Sprintf("%s|%d", currentImg.ImageUrl, currentImg.SortOrder)
+		if receivedImg, exists := receivedImageMap[key]; exists {
+			// update image id with the correspondent one
+			receivedImg.ID = &currentID
+			toUpdate = append(toUpdate, receivedImg)
+			delete(receivedImageMap, key) // remove from map
+		} else {
+			// mark delete if wasnt find
+			toDelete = append(toDelete, currentID)
+		}
+	}
+
+	// process new images
+	for _, img := range receivedImageMap {
+		if img.ID == nil {
+			toCreate = append(toCreate, img)
+		}
+	}
+
+	// exec operations
+	if err := deleteImages(tx, toDelete); err != nil {
+		return err
+	}
+	if err := updateImages(tx, toUpdate); err != nil {
+		return err
+	}
+	if err := createImages(tx, productID, toCreate); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func getCurrentImages(tx *sql.Tx, productID int) (map[int]types.ProductImage, error) {
+	images := make(map[int]types.ProductImage)
+
+	rows, err := tx.Query("SELECT id, imageUrl, sortOrder FROM product_images WHERE productId = ?", productID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var img types.ProductImage
+		err := rows.Scan(&img.ID, &img.ImageUrl, &img.SortOrder)
+		if err != nil {
+			return nil, err
+		}
+		images[img.ID] = img
+	}
+
+	return images, nil
+}
+
+func deleteImages(tx *sql.Tx, ids []int) error {
+	if len(ids) == 0 {
+		return nil
+	}
+
+	query := "DELETE FROM product_images WHERE id IN (?" + strings.Repeat(",?", len(ids)-1) + ")"
+	args := make([]interface{}, len(ids))
+	for i, id := range ids {
+		args[i] = id
+	}
+
+	_, err := tx.Exec(query, args...)
+	return err
+}
+
+func updateImages(tx *sql.Tx, images []types.ImageUpdatePayload) error {
+	for _, img := range images {
+		_, err := tx.Exec(
+			"UPDATE product_images SET imageUrl = ?, sortOrder = ? WHERE id = ?",
+			img.ImageUrl, img.SortOrder, *img.ID,
+		)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func createImages(tx *sql.Tx, productID int, images []types.ImageUpdatePayload) error {
+	for _, img := range images {
+		_, err := tx.Exec(
+			"INSERT INTO product_images (productId, imageUrl, sortOrder) VALUES (?, ?, ?)",
+			productID, img.ImageUrl, img.SortOrder,
+		)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func updateProductDetails(tx *sql.Tx, productID int, payload types.UpdateProductPayload) error {
+	query := "UPDATE products SET"
+	args := make([]interface{}, 0)
+	updates := make([]string, 0)
+
+	if payload.Title != nil {
+		updates = append(updates, " title = ?")
+		args = append(args, *payload.Title)
+	}
+	if payload.Description != nil {
+		updates = append(updates, " description = ?")
+		args = append(args, *payload.Description)
+	}
+	if payload.BasePrice != nil {
+		updates = append(updates, " basePrice = ?")
+		args = append(args, *payload.BasePrice)
+	}
+
+	if len(updates) == 0 {
+		return nil
+	}
+
+	query += strings.Join(updates, ",") + " WHERE id = ?"
+	args = append(args, productID)
+
+	_, err := tx.Exec(query, args...)
+	return err
+}
+
 func scanRowsIntoProduct(rows *sql.Rows) (*types.Product, error) {
 	product := new(types.Product)
 

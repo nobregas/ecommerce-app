@@ -3,6 +3,7 @@ package product
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
@@ -22,14 +23,17 @@ func NewHandler(store types.ProductStore, userStore types.UserStore) *Handler {
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	// user routes
-	router.HandleFunc("/product", auth.WithJwtAuth(h.handleGetProducts, h.userStore)).Methods("GET")
+	router.HandleFunc("/product", auth.WithJwtAuth(h.handleGetProducts, h.userStore)).Methods(http.MethodGet)
 
 	// admin routes
 	router.HandleFunc("/product", auth.WithJwtAuth(
-		auth.WithAdminAuth(h.handleCreateProduct), h.userStore)).Methods("POST")
+		auth.WithAdminAuth(h.handleCreateProduct), h.userStore)).Methods(http.MethodPost)
 
 	router.HandleFunc("/product-with-images", auth.WithJwtAuth(
-		auth.WithAdminAuth(h.handleCreateProductWithImages), h.userStore)).Methods("POST")
+		auth.WithAdminAuth(h.handleCreateProductWithImages), h.userStore)).Methods(http.MethodPost)
+
+	router.HandleFunc("/product/{productID}", auth.WithJwtAuth(
+		auth.WithAdminAuth(h.handleUpdateProductByID), h.userStore)).Methods(http.MethodPatch)
 }
 
 func (h *Handler) handleGetProducts(w http.ResponseWriter, r *http.Request) {
@@ -93,4 +97,57 @@ func (h *Handler) handleCreateProductWithImages(w http.ResponseWriter, r *http.R
 
 	// response
 	utils.WriteJson(w, http.StatusCreated, createdProduct)
+}
+
+func (h *Handler) handleUpdateProductByID(w http.ResponseWriter, r *http.Request) {
+	// get product id
+	vars := mux.Vars(r)
+	str, ok := vars["productID"]
+	if !ok {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing productID"))
+		return
+	}
+
+	// convert product id to str
+	productID, err := strconv.Atoi(str)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid productID"))
+		return
+	}
+
+	// verify if the product exists
+	_, err = h.store.GetProductByID(productID)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("product with id %d not found", productID))
+		return
+	}
+
+	// get payload
+	var payload types.UpdateProductPayload
+	if err := utils.ParseJson(r, &payload); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	// validate payload
+	if err := utils.Validate.Struct(payload); err != nil {
+		errors := err.(validator.ValidationErrors)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload %v", errors))
+		return
+	}
+
+	// update
+	if err := h.store.UpdateProduct(productID, payload); err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	// response
+	updatedProduct, err := h.store.GetProductByID(productID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.WriteJson(w, http.StatusOK, updatedProduct)
 }

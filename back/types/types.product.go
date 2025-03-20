@@ -10,6 +10,8 @@ type ProductStore interface {
 	UpdateStock(productID int, quantityChange int) error
 	GetInventory(productID int) (*Inventory, error)
 	GetImagesForProducts(productIDs []int) (map[int][]ProductImage, error)
+	UpdateProduct(productID int, payload UpdateProductPayload) error
+	DeleteProduct(productID int) error
 }
 
 type Product struct {
@@ -51,7 +53,21 @@ type CreateProductWithImagesPayload struct {
 	Images        []ImagePayload `json:"images" validate:"required,min=1,dive"`
 }
 
+type UpdateProductPayload struct {
+	Title       *string              `json:"title,omitempty" validate:"omitempty,min=3,max=100"`
+	Description *string              `json:"description,omitempty" validate:"omitempty,max=1000"`
+	BasePrice   *float64             `json:"basePrice,omitempty" validate:"omitempty,gt=0"`
+	Images      []ImageUpdatePayload `json:"images,omitempty" validate:"omitempty,dive"`
+}
+
 type ImagePayload struct {
 	ImageUrl  string `json:"imageUrl" validate:"required"`
 	SortOrder int    `json:"sortOrder" validate:"min=0"`
+}
+
+type ImageUpdatePayload struct {
+	ID        *int   `json:"id,omitempty"`
+	ImageUrl  string `json:"imageUrl" validate:"required"`
+	SortOrder int    `json:"sortOrder" validate:"min=0"`
+	Deleted   bool   `json:"deleted,omitempty"`
 }
