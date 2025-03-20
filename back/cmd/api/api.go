@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nobregas/ecommerce-mobile-back/services/category"
 	"github.com/nobregas/ecommerce-mobile-back/services/product"
+	"github.com/nobregas/ecommerce-mobile-back/services/product/discount"
 	"github.com/nobregas/ecommerce-mobile-back/services/user"
 )
 
@@ -41,6 +42,11 @@ func (s *APIServer) Run() error {
 	categoryStore := category.NewStore(s.db)
 	categoryHandler := category.NewHandler(categoryStore, userStore)
 	categoryHandler.RegisterRoutes(subrouter)
+
+	// discount
+	discountStore := discount.NewStore(s.db)
+	discountHandler := discount.NewHandler(discountStore, productStore, userStore)
+	discountHandler.RegisterRoutes(subrouter)
 
 	log.Printf("Server listening on %s", s.addr)
 
