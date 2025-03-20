@@ -77,6 +77,10 @@ func TestUserServiceHandlers(t *testing.T) {
 
 type mockUserStore struct{}
 
+func (s *mockUserStore) GetUserByCPF(cpf string) (*types.User, error) {
+	return nil, nil
+}
+
 func (m *mockUserStore) GetUserByEmail(email string) (*types.User, error) {
 	return nil, fmt.Errorf("user not found")
 }

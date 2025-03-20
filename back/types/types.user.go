@@ -5,6 +5,7 @@ import "time"
 type UserStore interface {
 	GetUserByEmail(email string) (*User, error)
 	GetUserByID(id int) (*User, error)
+	GetUserByCPF(cpf string) (*User, error)
 	CreateUser(User) error
 }
 

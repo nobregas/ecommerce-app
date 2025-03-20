@@ -88,10 +88,17 @@ func (h *Handler) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// check if the user exists
+	// check if the user exists with email
 	_, err := h.store.GetUserByEmail(payload.Email)
 	if err == nil {
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("email with email %s already exists", payload.Email))
+		return
+	}
+
+	// check if the user exists with cpf
+	_, err = h.store.GetUserByCPF(payload.Cpf)
+	if err == nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("user with cpf %s already exists", payload.Cpf))
 		return
 	}
 
