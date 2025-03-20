@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/mux"
 )
 
 var Validate = validator.New()
@@ -42,4 +44,20 @@ func GetTokenFromRequest(r *http.Request) string {
 	}
 
 	return tokenAuth
+}
+
+func GetParamIdfromPath(r *http.Request, paramID string) (int, error) {
+	// get param id
+	vars := mux.Vars(r)
+	str, ok := vars[paramID]
+	if !ok {
+		return -1, fmt.Errorf("missing %s", paramID)
+	}
+
+	// convert param id to str
+	productID, err := strconv.Atoi(str)
+	if err != nil {
+		return -1, fmt.Errorf("invalid %s", paramID)
+	}
+	return productID, nil
 }

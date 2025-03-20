@@ -39,7 +39,7 @@ func (s *APIServer) Run() error {
 
 	// category
 	categoryStore := category.NewStore(s.db)
-	categoryHandler := category.NewHandler(categoryStore)
+	categoryHandler := category.NewHandler(categoryStore, userStore)
 	categoryHandler.RegisterRoutes(subrouter)
 
 	log.Printf("Server listening on %s", s.addr)

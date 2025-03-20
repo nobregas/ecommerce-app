@@ -3,7 +3,6 @@ package product
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
@@ -24,6 +23,12 @@ func NewHandler(store types.ProductStore, userStore types.UserStore) *Handler {
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	// user routes
 	router.HandleFunc("/product", auth.WithJwtAuth(h.handleGetProducts, h.userStore)).Methods(http.MethodGet)
+
+	router.HandleFunc("/product/{productID}", auth.WithJwtAuth(
+		h.handleGetProductByID, h.userStore)).Methods(http.MethodGet)
+
+	router.HandleFunc("/product/category/{categoryID}", auth.WithJwtAuth(
+		h.handleGetProductsByCategoryID, h.userStore)).Methods(http.MethodGet)
 
 	// admin routes
 	router.HandleFunc("/product", auth.WithJwtAuth(
@@ -47,6 +52,38 @@ func (h *Handler) handleGetProducts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJson(w, http.StatusOK, ps)
+}
+
+func (h *Handler) handleGetProductByID(w http.ResponseWriter, r *http.Request) {
+	productID, err := utils.GetParamIdfromPath(r, "productID")
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	product, err := h.store.GetProductByID(productID)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("product with id %d not found", productID))
+		return
+	}
+
+	utils.WriteJson(w, http.StatusOK, product)
+}
+
+func (h *Handler) handleGetProductsByCategoryID(w http.ResponseWriter, r *http.Request) {
+	categoryID, err := utils.GetParamIdfromPath(r, "categoryID")
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	products, err := h.store.GetProductsByCategory(categoryID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.WriteJson(w, http.StatusOK, products)
 }
 
 func (h *Handler) handleCreateProduct(w http.ResponseWriter, r *http.Request) {
@@ -104,7 +141,7 @@ func (h *Handler) handleCreateProductWithImages(w http.ResponseWriter, r *http.R
 
 func (h *Handler) handleUpdateProductByID(w http.ResponseWriter, r *http.Request) {
 	// get product id
-	productID, err := getProductIdfromPath(r)
+	productID, err := utils.GetParamIdfromPath(r, "productID")
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
@@ -149,7 +186,7 @@ func (h *Handler) handleUpdateProductByID(w http.ResponseWriter, r *http.Request
 
 func (h *Handler) handleDeleteProduct(w http.ResponseWriter, r *http.Request) {
 	// get product id
-	productID, err := getProductIdfromPath(r)
+	productID, err := utils.GetParamIdfromPath(r, "productID")
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
@@ -169,20 +206,4 @@ func (h *Handler) handleDeleteProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJson(w, http.StatusNoContent, nil)
-}
-
-func getProductIdfromPath(r *http.Request) (int, error) {
-	// get product id
-	vars := mux.Vars(r)
-	str, ok := vars["productID"]
-	if !ok {
-		return -1, fmt.Errorf("missing productID")
-	}
-
-	// convert product id to str
-	productID, err := strconv.Atoi(str)
-	if err != nil {
-		return -1, fmt.Errorf("invalid productID")
-	}
-	return productID, nil
 }

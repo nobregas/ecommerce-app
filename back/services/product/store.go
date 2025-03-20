@@ -52,6 +52,81 @@ func (s *Store) GetProducts() ([]*types.Product, error) {
 		}
 	}
 
+	// find categories
+	for _, p := range products {
+		cat, err := s.GetProductCategories(p.ID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get categories: %w", err)
+		}
+		p.Categories = cat
+	}
+
+	return products, nil
+}
+
+func (s *Store) GetProductsByCategory(categoryID int) ([]*types.Product, error) {
+	rows, err := s.db.Query(`
+        SELECT 
+            p.id, 
+            p.title, 
+            p.description, 
+            p.basePrice, 
+            p.createdAt, 
+            p.updatedAt,
+            i.stock_quantity, 
+            i.version
+        FROM products p
+        INNER JOIN inventory i ON p.id = i.product_id
+        INNER JOIN product_categories pc ON p.id = pc.productId
+        WHERE pc.categoryId = ?
+    `, categoryID)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get products: %w", err)
+	}
+	defer rows.Close()
+
+	var products []*types.Product
+	var productIDs []int
+
+	for rows.Next() {
+		p := new(types.Product)
+
+		err := rows.Scan(
+			&p.ID,
+			&p.Title,
+			&p.Description,
+			&p.BasePrice,
+			&p.CreatedAt,
+			&p.UpdatedAt,
+			&p.Inventory.StockQuantity,
+			&p.Inventory.Version,
+		)
+		if err != nil {
+			return nil, err
+		}
+		p.Inventory.ProductID = p.ID
+
+		productIDs = append(productIDs, p.ID)
+		products = append(products, p)
+	}
+
+	if len(productIDs) > 0 {
+		imagesMap, err := s.GetImagesForProducts(productIDs)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get images: %w", err)
+		}
+
+		for _, p := range products {
+			p.Images = imagesMap[p.ID]
+
+			categories, err := s.GetProductCategories(p.ID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get categories for product %d: %w", p.ID, err)
+			}
+			p.Categories = categories
+		}
+	}
 	return products, nil
 }
 
@@ -117,7 +192,39 @@ func (s *Store) GetProductByID(productID int) (*types.Product, error) {
 		product.Images = append(product.Images, img)
 	}
 
+	categories, err := s.GetProductCategories(productID)
+	if err != nil {
+		return nil, err
+	}
+	product.Categories = categories
+
 	return product, nil
+}
+
+func (s *Store) GetProductCategories(productID int) ([]types.Category, error) {
+	rows, err := s.db.Query(`
+        SELECT c.id, c.name, c.imageUrl, c.parentCategoryId 
+        FROM product_categories pc
+        JOIN categories c ON pc.categoryId = c.id
+        WHERE pc.productId = ?
+    `, productID)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var categories []types.Category
+	for rows.Next() {
+		var c types.Category
+		err := rows.Scan(&c.ID, &c.Name, &c.ImageUrl, &c.ParentCategoryId)
+		if err != nil {
+			return nil, err
+		}
+		categories = append(categories, c)
+	}
+
+	return categories, nil
 }
 
 func (s *Store) CreateProduct(product types.CreateProductPayload) error {
@@ -149,6 +256,17 @@ func (s *Store) CreateProduct(product types.CreateProductPayload) error {
 	)
 	if err != nil {
 		return err
+	}
+
+	// add categories
+	for _, categoryID := range product.CategoryIDs {
+		_, err := tx.Exec(
+			`INSERT INTO product_categories (productId, categoryId) VALUES (?, ?)`,
+			productID, categoryID,
+		)
+		if err != nil {
+			return fmt.Errorf("failed to add category: %w", err)
+		}
 	}
 
 	return tx.Commit()
@@ -193,6 +311,17 @@ func (s *Store) CreateProductWithImages(payload types.CreateProductWithImagesPay
 		)
 		if err != nil {
 			return nil, err
+		}
+	}
+
+	// add categories
+	for _, categoryID := range payload.CategoryIDs {
+		_, err := tx.Exec(
+			`INSERT INTO product_categories (productId, categoryId) VALUES (?, ?)`,
+			productID, categoryID,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to add category: %w", err)
 		}
 	}
 

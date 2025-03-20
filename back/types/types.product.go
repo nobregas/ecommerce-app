@@ -12,6 +12,7 @@ type ProductStore interface {
 	GetImagesForProducts(productIDs []int) (map[int][]ProductImage, error)
 	UpdateProduct(productID int, payload UpdateProductPayload) error
 	DeleteProduct(productID int) error
+	GetProductsByCategory(categoryID int) ([]*Product, error)
 }
 
 type Product struct {
@@ -21,6 +22,7 @@ type Product struct {
 	BasePrice   float64        `json:"basePrice"`
 	Inventory   Inventory      `json:"inventory"`
 	Images      []ProductImage `json:"images"`
+	Categories  []Category     `json:"categories"`
 	CreatedAt   time.Time      `json:"createdAt"`
 	UpdatedAt   time.Time      `json:"updatedAt"`
 }
@@ -43,6 +45,7 @@ type CreateProductPayload struct {
 	Description   string  `json:"description" validate:"max=1000"`
 	BasePrice     float64 `json:"basePrice" validate:"required,gt=0"`
 	StockQuantity int     `json:"stockQuantity" validate:"required,min=0"`
+	CategoryIDs   []int   `json:"categoryIds" validate:"required,min=1"`
 }
 
 type CreateProductWithImagesPayload struct {
@@ -51,6 +54,7 @@ type CreateProductWithImagesPayload struct {
 	BasePrice     float64        `json:"basePrice" validate:"required,gt=0"`
 	StockQuantity int            `json:"stockQuantity" validate:"required,min=0"`
 	Images        []ImagePayload `json:"images" validate:"required,min=1,dive"`
+	CategoryIDs   []int          `json:"categoryIds" validate:"required,min=1"`
 }
 
 type UpdateProductPayload struct {
