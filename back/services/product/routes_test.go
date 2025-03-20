@@ -9,6 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/nobregas/ecommerce-mobile-back/types"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestProductServiceHandlers(t *testing.T) {
@@ -88,6 +89,24 @@ func TestProductServiceHandlers(t *testing.T) {
 		}
 	})
 
+	t.Run("should create product with image if the payload is valid", func(t *testing.T) {
+		payload := types.CreateProductWithImagesPayload{
+			Title:         "Smartphone",
+			Description:   "128GB RAM",
+			BasePrice:     2999.90,
+			StockQuantity: 50,
+			Images: []types.ImagePayload{
+				{ImageUrl: "image1.jpg", SortOrder: 0},
+			},
+		}
+
+		product, err := productStore.CreateProductWithImages(payload)
+
+		assert.NoError(t, err)
+		assert.Equal(t, 50, product.Inventory.StockQuantity)
+		assert.Equal(t, product.ID, product.Inventory.ProductID)
+	})
+
 	t.Run("should handle creating a product", func(t *testing.T) {
 		payload := types.CreateProductPayload{
 			Title:         "test",
@@ -163,7 +182,9 @@ func (m *mockProductStore) CreateProductWithImages(product types.CreateProductWi
 	return nil, nil
 }
 
-func (m *mockProductStore) GetImagesForProducts(productIDs []int) (map[int][]types.ProductImage, error)
+func (m *mockProductStore) GetImagesForProducts(productIDs []int) (map[int][]types.ProductImage, error) {
+	return nil, nil
+}
 
 func (m *mockProductStore) UpdateStock(productID int, quantityChange int) error {
 	return nil

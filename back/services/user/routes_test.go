@@ -49,7 +49,7 @@ func TestUserServiceHandlers(t *testing.T) {
 		payload := types.RegisterUserPayload{
 			FullName: "Joao da Silva",
 			Email:    "valid@gmail.com",
-			Cpf:      "00000000000",
+			Cpf:      "12254056799",
 			Password: "test",
 		}
 		marshalled, _ := json.Marshal(payload)
