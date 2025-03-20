@@ -3,6 +3,7 @@ package user
 import (
 	"database/sql"
 	"fmt"
+	"log"
 
 	"github.com/nobregas/ecommerce-mobile-back/types"
 )
@@ -25,6 +26,7 @@ func (s *Store) GetUserByEmail(email string) (*types.User, error) {
 	for rows.Next() {
 		u, err = scanRowsIntoUser(rows)
 		if err != nil {
+			log.Fatal(err)
 			return nil, err
 		}
 	}
@@ -32,7 +34,6 @@ func (s *Store) GetUserByEmail(email string) (*types.User, error) {
 	if u.ID == 0 {
 		return nil, fmt.Errorf("user not found")
 	}
-
 	return u, nil
 }
 
@@ -83,6 +84,8 @@ func scanRowsIntoUser(rows *sql.Rows) (*types.User, error) {
 		&user.Cpf,
 		&user.Password,
 		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.Role,
 	)
 	if err != nil {
 		return nil, err

@@ -16,6 +16,7 @@ type User struct {
 	Role      string    `json:"role"`
 	Password  string    `json:"-"`
 	CreatedAt time.Time `json: "createdAt"`
+	UpdatedAt time.Time `json: "updatedAt"`
 }
 
 type RegisterUserPayload struct {
