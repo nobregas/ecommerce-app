@@ -1,4 +1,8 @@
 todos:
+    product_discounts 
+   
+    product_ratings
+   
     cart crud
     
     notifications crud
@@ -7,10 +11,6 @@ todos:
     
     user profile_img 
     
-    product_discounts 
-
-    product_ratings
-
     create order-history table
 
     create user-address table
@@ -18,3 +18,7 @@ todos:
     pagination
 
     search product
+
+    create /me
+
+    create refresh token

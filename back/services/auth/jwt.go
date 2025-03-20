@@ -17,37 +17,33 @@ import (
 type contextKey string
 
 const (
-	UserKey     contextKey = "userId"
-	UserRoleKey contextKey = "userRole"
+	userKey     contextKey = "userId"
+	userRoleKey contextKey = "userRole"
 )
 
-func CreateJWT(secret []byte, userId int, userRole string) (string, error) {
+func CreateJWT(secret []byte, userId int, userRole types.UserRole) (string, error) {
 	expiration := time.Second * time.Duration(configs.Envs.JWTExpirationInSeconds)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userId":    strconv.Itoa(userId),
-		"expiredAt": time.Now().Add(expiration).Unix(),
-		"userRole":  userRole,
+		"userId":   strconv.Itoa(userId),
+		"exp":      time.Now().Add(expiration).Unix(),
+		"userRole": string(userRole),
 	})
 
 	tokenString, err := token.SignedString(secret)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to sign token: %w", err)
 	}
 
 	return tokenString, nil
 }
 
 func WithAdminAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
-	const requiredRole = "ADMIN"
-
 	return func(w http.ResponseWriter, r *http.Request) {
-		// get the user role from context
-		userRole := getUserRoleFromContext(r.Context())
+		userRole := GetUserRoleFromContext(r.Context())
 
-		// check if the user has the required role
-		if userRole != requiredRole {
-			permissionDenied(w)
+		if userRole != types.RoleAdmin {
+			utils.WriteError(w, http.StatusForbidden, fmt.Errorf("access denied"))
 			return
 		}
 
@@ -57,43 +53,43 @@ func WithAdminAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
 
 func WithJwtAuth(handlerFunc http.HandlerFunc, store types.UserStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// get the JWT token from the request header
 		tokenString := utils.GetTokenFromRequest(r)
+		if tokenString == "" {
+			unauthorized(w)
+			return
+		}
 
-		// validate the token
 		token, err := validateToken(tokenString)
+		if err != nil || !token.Valid {
+			log.Printf("invalid token: %v", err)
+			unauthorized(w)
+			return
+		}
+
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			unauthorized(w)
+			return
+		}
+
+		userID, err := parseUserID(claims)
 		if err != nil {
-			log.Printf("failed to validate token: %v", err)
+			log.Printf("invalid user ID: %v", err)
 			unauthorized(w)
 			return
 		}
 
-		if !token.Valid {
-			log.Printf("invalid token")
-			unauthorized(w)
-			return
-		}
-
-		// if the token is valid, fetch the userID from the DB (id from token)
-		claims := token.Claims.(jwt.MapClaims)
-		str := claims["userId"].(string)
-
-		userID, _ := strconv.Atoi(str)
-
-		u, err := store.GetUserByID(userID)
+		user, err := store.GetUserByID(userID)
 		if err != nil {
-			log.Printf("failed to get user: %v", err)
+			log.Printf("user not found: %v", err)
 			unauthorized(w)
 			return
 		}
 
-		// set context "userID" to the user ID and "userRole"
-		ctx := r.Context()
-		ctx = context.WithValue(ctx, UserKey, u.ID)
-		ctx = context.WithValue(ctx, UserRoleKey, u.Role)
-		r = r.WithContext(ctx)
+		ctx := context.WithValue(r.Context(), userKey, user.ID)
+		ctx = context.WithValue(ctx, userRoleKey, user.Role)
 
-		handlerFunc(w, r)
+		handlerFunc(w, r.WithContext(ctx))
 	}
 }
 
@@ -102,33 +98,34 @@ func validateToken(t string) (*jwt.Token, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-
 		return []byte(configs.Envs.JWTSecret), nil
 	})
 }
 
-func unauthorized(w http.ResponseWriter) {
-	utils.WriteError(w, http.StatusUnauthorized, fmt.Errorf("unauthorized"))
-}
-
-func permissionDenied(w http.ResponseWriter) {
-	utils.WriteError(w, http.StatusForbidden, fmt.Errorf("permission denied"))
-}
-
-func GetUserIdFromContext(ctx context.Context) int {
-	userID, ok := ctx.Value(UserKey).(int)
+func parseUserID(claims jwt.MapClaims) (int, error) {
+	userIDStr, ok := claims["userId"].(string)
 	if !ok {
-		return -1
+		return 0, fmt.Errorf("invalid user ID type")
 	}
 
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		return 0, fmt.Errorf("invalid user ID format")
+	}
+
+	return userID, nil
+}
+
+func GetUserIDFromContext(ctx context.Context) int {
+	userID, _ := ctx.Value(userKey).(int)
 	return userID
 }
 
-func getUserRoleFromContext(ctx context.Context) string {
-	role, ok := ctx.Value(UserRoleKey).(string)
-	if !ok {
-		return ""
-	}
-
+func GetUserRoleFromContext(ctx context.Context) types.UserRole {
+	role, _ := ctx.Value(userRoleKey).(types.UserRole)
 	return role
+}
+
+func unauthorized(w http.ResponseWriter) {
+	utils.WriteError(w, http.StatusUnauthorized, fmt.Errorf("invalid or missing authentication token"))
 }

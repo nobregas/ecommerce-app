@@ -10,14 +10,15 @@ type UserStore interface {
 }
 
 type User struct {
-	ID        int       `json:"id"`
-	FullName  string    `json:"fullName"`
-	Email     string    `json:"email"`
-	Cpf       string    `json:"cpf"`
-	Role      string    `json:"role"`
-	Password  string    `json:"-"`
-	CreatedAt time.Time `json: "createdAt"`
-	UpdatedAt time.Time `json: "updatedAt"`
+	ID         int       `json:"id"`
+	FullName   string    `json:"fullName"`
+	Email      string    `json:"email"`
+	Cpf        string    `json:"cpf"`
+	Role       UserRole  `json:"role" validate:"required,oneof=USER ADMIN"`
+	ProfileImg string    `json:"profileImg"`
+	Password   string    `json:"-"`
+	CreatedAt  time.Time `json: "createdAt"`
+	UpdatedAt  time.Time `json: "updatedAt"`
 }
 
 type RegisterUserPayload struct {
@@ -30,4 +31,15 @@ type RegisterUserPayload struct {
 type LoginUserPayload struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required"`
+}
+
+func (u *User) Sanitize() map[string]interface{} {
+	return map[string]interface{}{
+		"id":         u.ID,
+		"fullName":   u.FullName,
+		"email":      u.Email,
+		"createdAt":  u.CreatedAt,
+		"role":       u.Role,
+		"profileImg": u.ProfileImg,
+	}
 }

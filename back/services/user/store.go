@@ -38,66 +38,76 @@ func (s *Store) GetUserByEmail(email string) (*types.User, error) {
 }
 
 func (s *Store) GetUserByID(id int) (*types.User, error) {
-	rows, err := s.db.Query("SELECT * FROM users WHERE id = ?", id)
-	if err != nil {
-		return nil, err
-	}
+	query := `
+        SELECT id, fullName, email, cpf, password, createdAt, updatedAt, role, profile_img 
+        FROM users 
+        WHERE id = ?`
 
-	u := new(types.User)
-
-	for rows.Next() {
-		u, err = scanRowsIntoUser(rows)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if u.ID == 0 {
-		return nil, fmt.Errorf("user not found")
-	}
-
-	return u, nil
+	row := s.db.QueryRow(query, id)
+	return s.scanRowIntoUser(row)
 }
 
 func (s *Store) GetUserByCPF(cpf string) (*types.User, error) {
-	rows, err := s.db.Query("SELECT * FROM users WHERE cpf = ?", cpf)
-	if err != nil {
-		return nil, err
-	}
+	query := `
+        SELECT id, fullName, email, cpf, password, createdAt, updatedAt, role, profile_img 
+        FROM users 
+        WHERE cpf = ?`
 
-	u := new(types.User)
-
-	for rows.Next() {
-		u, err = scanRowsIntoUser(rows)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if u.ID == 0 {
-		return nil, fmt.Errorf("user not found")
-	}
-
-	return u, nil
+	row := s.db.QueryRow(query, cpf)
+	return s.scanRowIntoUser(row)
 }
 
 func (s *Store) CreateUser(user types.User) error {
-	_, err := s.db.Exec(
-		"INSERT INTO users (fullName, email, cpf, password) VALUES (?, ?, ?, ?)",
+	query := `
+        INSERT INTO users 
+            (fullName, email, cpf, password, role, profile_img) 
+        VALUES (?, ?, ?, ?, ?, ?)`
+
+	_, err := s.db.Exec(query,
 		user.FullName,
 		user.Email,
 		user.Cpf,
 		user.Password,
+		user.Role,
+		user.ProfileImg,
 	)
+	return err
+}
+
+func (s *Store) scanRowIntoUser(row *sql.Row) (*types.User, error) {
+	user := &types.User{}
+	var roleStr string
+
+	err := row.Scan(
+		&user.ID,
+		&user.FullName,
+		&user.Email,
+		&user.Cpf,
+		&user.Password,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&roleStr,
+		&user.ProfileImg,
+	)
+
 	if err != nil {
-		return err
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("user not found")
+		}
+		return nil, fmt.Errorf("error scanning row: %w", err)
 	}
 
-	return nil
+	user.Role = types.UserRole(roleStr)
+	if err := user.Role.Valid(); err != nil {
+		return nil, fmt.Errorf("invalid role value '%s': %w", roleStr, err)
+	}
+
+	return user, nil
 }
 
 func scanRowsIntoUser(rows *sql.Rows) (*types.User, error) {
 	user := new(types.User)
+	var roleStr string
 
 	err := rows.Scan(
 		&user.ID,
@@ -107,11 +117,16 @@ func scanRowsIntoUser(rows *sql.Rows) (*types.User, error) {
 		&user.Password,
 		&user.CreatedAt,
 		&user.UpdatedAt,
-		&user.Role,
+		&roleStr,
+		&user.ProfileImg,
 	)
 	if err != nil {
 		return nil, err
 	}
 
+	user.Role = types.UserRole(roleStr)
+	if err := user.Role.Valid(); err != nil {
+		return nil, fmt.Errorf("invalid role value '%s': %w", roleStr, err)
+	}
 	return user, nil
 }
