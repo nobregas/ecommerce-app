@@ -57,7 +57,7 @@ func (s *Store) GetRatingsByProduct(productID int) ([]*types.ProductRating, erro
 	return scanRatings(rows)
 }
 
-func (s *Store) GetRatingsByUser(int) ([]*types.ProductRating, error) {
+func (s *Store) GetRatingsByUser(userID int) ([]*types.ProductRating, error) {
 	query := `
 		SELECT id, userId, productId, rating, comment, createdAt
 		FROM product_ratings
@@ -65,7 +65,7 @@ func (s *Store) GetRatingsByUser(int) ([]*types.ProductRating, error) {
 		ORDER BY createdAt DESC
 	`
 
-	rows, err := s.db.Query(query)
+	rows, err := s.db.Query(query, userID)
 	if err != nil {
 		return nil, err
 	}

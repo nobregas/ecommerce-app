@@ -32,7 +32,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/product/{productID}/rating", auth.WithJwtAuth(
 		h.HandleGetProductRatings, h.userStore)).Methods(http.MethodGet)
 
-	router.HandleFunc("/user/my/{userID}/rating", auth.WithJwtAuth(
+	router.HandleFunc("/user/my/rating", auth.WithJwtAuth(
 		h.HandleGetMyRatings, h.userStore)).Methods(http.MethodGet)
 
 	router.HandleFunc("/product/{productID}/rating/average", auth.WithJwtAuth(
@@ -41,11 +41,11 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/product/{productID}/rating", auth.WithJwtAuth(
 		h.HandleUpdateProductRating, h.userStore)).Methods(http.MethodPatch)
 
-	router.HandleFunc("/user/my/{userID}/rating", auth.WithJwtAuth(
+	router.HandleFunc("/user/my/rating/{ratingID}", auth.WithJwtAuth(
 		h.HandleDeleteMyProductRating, h.userStore)).Methods(http.MethodDelete)
 
 	// admin routes
-	router.HandleFunc("/user/{userID}/ratings", auth.WithJwtAuth(
+	router.HandleFunc("/user/{userID}/rating", auth.WithJwtAuth(
 		auth.WithAdminAuth(h.HandleGetUserRatings), h.userStore)).Methods(http.MethodGet)
 
 	router.HandleFunc("/product/{productID}/rating", auth.WithJwtAuth(
@@ -121,11 +121,44 @@ func (h *Handler) HandleGetProductRatings(w http.ResponseWriter, r *http.Request
 }
 
 func (h *Handler) HandleGetUserRatings(w http.ResponseWriter, r *http.Request) {
+	// get user ID from params
+	userID, err := utils.GetParamIdfromPath(r, "userID")
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
 
+	// verify if user exists
+	_, err = h.userStore.GetUserByID(userID)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("user with id %d not found", userID))
+		return
+	}
+
+	// get ratings
+	ratings, err := h.store.GetRatingsByUser(userID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	// response
+	utils.WriteJson(w, http.StatusOK, ratings)
 }
 
 func (h *Handler) HandleGetMyRatings(w http.ResponseWriter, r *http.Request) {
+	// get user ID from context
+	userID := auth.GetUserIDFromContext(r.Context())
 
+	// get ratings
+	ratings, err := h.store.GetRatingsByUser(userID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	// response
+	utils.WriteJson(w, http.StatusOK, ratings)
 }
 
 func (h *Handler) HandleGetProductAverageRating(w http.ResponseWriter, r *http.Request) {
