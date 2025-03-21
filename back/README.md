@@ -1,19 +1,19 @@
 todos:
-    product_discounts 
+    product_discounts (done)
    
     product_ratings
    
-    cart crud
-    
     notifications crud
     
     user_favorite products
     
-    user profile_img 
+    user-address
     
-    create order-history table
+    user profile_img (done) 
+    
+    cart crud
 
-    create user-address table
+    order-history 
 
     pagination
 
