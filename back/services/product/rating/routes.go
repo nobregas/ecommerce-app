@@ -48,7 +48,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/user/{userID}/rating", auth.WithJwtAuth(
 		auth.WithAdminAuth(h.HandleGetUserRatings), h.userStore)).Methods(http.MethodGet)
 
-	router.HandleFunc("/product/{productID}/rating", auth.WithJwtAuth(
+	router.HandleFunc("/product/{ratingID}/rating", auth.WithJwtAuth(
 		auth.WithAdminAuth(h.HandleDeleteProductRating), h.userStore)).Methods(http.MethodDelete)
 }
 
@@ -192,7 +192,28 @@ func (h *Handler) HandleUpdateProductRating(w http.ResponseWriter, r *http.Reque
 }
 
 func (h *Handler) HandleDeleteProductRating(w http.ResponseWriter, r *http.Request) {
+	// get rating ID from params
+	ratingID, err := utils.GetParamIdfromPath(r, "ratingID")
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
 
+	// verify if rating exists
+	_, err = h.store.GetRating(ratingID)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("rating with id %d not found", ratingID))
+		return
+	}
+
+	// delete rating
+	if err := h.store.DeleteRating(ratingID); err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	// response
+	utils.WriteJson(w, http.StatusNoContent, nil)
 }
 
 func (h *Handler) HandleDeleteMyProductRating(w http.ResponseWriter, r *http.Request) {
