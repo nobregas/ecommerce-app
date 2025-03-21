@@ -188,7 +188,51 @@ func (h *Handler) HandleGetProductAverageRating(w http.ResponseWriter, r *http.R
 }
 
 func (h *Handler) HandleUpdateProductRating(w http.ResponseWriter, r *http.Request) {
+	// get rating ID from params
+	ratingID, err := utils.GetParamIdfromPath(r, "ratingID")
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
 
+	// verify if rating exists
+	rating, err := h.store.GetRating(ratingID)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("rating with id %d not found", ratingID))
+		return
+	}
+
+	// get userID from context
+	userID := auth.GetUserIDFromContext(r.Context())
+
+	// verify if rating belongs to user
+	if rating.UserID != userID {
+		utils.WriteError(w, http.StatusForbidden, fmt.Errorf("rating with id %d does not belong to user with id %d", ratingID, userID))
+		return
+	}
+
+	// get payload from body
+	var payload types.UpdateProductRatingPayload
+	if err := utils.ParseJson(r, &payload); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	// validate payload
+	if err := utils.Validate.Struct(payload); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload: %v", err))
+		return
+	}
+
+	// update rating
+	updatedRating, err := h.store.UpdateRating(ratingID, &payload)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	// response
+	utils.WriteJson(w, http.StatusOK, updatedRating)
 }
 
 func (h *Handler) HandleDeleteProductRating(w http.ResponseWriter, r *http.Request) {
