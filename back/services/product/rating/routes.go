@@ -204,9 +204,18 @@ func (h *Handler) HandleDeleteMyProductRating(w http.ResponseWriter, r *http.Req
 	}
 
 	// verify if rating exists
-	_, err = h.store.GetRating(ratingID)
+	rating, err := h.store.GetRating(ratingID)
 	if err != nil {
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("rating with id %d not found", ratingID))
+		return
+	}
+
+	// get user ID from context
+	userID := auth.GetUserIDFromContext(r.Context())
+
+	// verify if rating belongs to user
+	if rating.UserID != userID {
+		utils.WriteError(w, http.StatusForbidden, fmt.Errorf("rating with id %d does not belong to user with id %d", ratingID, userID))
 		return
 	}
 
