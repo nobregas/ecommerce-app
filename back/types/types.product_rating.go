@@ -7,6 +7,7 @@ type ProductRatingStore interface {
 	GetRatingsByProduct(int) ([]*ProductRating, error)
 	GetRatingsByUser(int) ([]*ProductRating, error)
 	GetRating(int) (*ProductRating, error)
+	GetAverageRating(productID int) (float64, error)
 	UpdateRating(int, *UpdateProductRatingPayload) (*ProductRating, error)
 	DeleteRating(int) error
 }

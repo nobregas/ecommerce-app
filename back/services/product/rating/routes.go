@@ -162,7 +162,29 @@ func (h *Handler) HandleGetMyRatings(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HandleGetProductAverageRating(w http.ResponseWriter, r *http.Request) {
+	// get product ID from params
+	productID, err := utils.GetParamIdfromPath(r, "productID")
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
 
+	// verify if product exists
+	_, err = h.productStore.GetProductByID(productID)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("product with id %d not found", productID))
+		return
+	}
+
+	// get average rating
+	averageRating, err := h.store.GetAverageRating(productID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	// response
+	utils.WriteJson(w, http.StatusOK, averageRating)
 }
 
 func (h *Handler) HandleUpdateProductRating(w http.ResponseWriter, r *http.Request) {
