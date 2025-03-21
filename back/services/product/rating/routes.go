@@ -95,7 +95,29 @@ func (h *Handler) HandleCreateProductRating(w http.ResponseWriter, r *http.Reque
 }
 
 func (h *Handler) HandleGetProductRatings(w http.ResponseWriter, r *http.Request) {
+	// get product ID from params
+	productID, err := utils.GetParamIdfromPath(r, "productID")
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
 
+	// verify if product exists
+	_, err = h.productStore.GetProductByID(productID)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("product with id %d not found", productID))
+		return
+	}
+
+	// get ratings
+	ratings, err := h.store.GetRatingsByProduct(productID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	// response
+	utils.WriteJson(w, http.StatusOK, ratings)
 }
 
 func (h *Handler) HandleGetUserRatings(w http.ResponseWriter, r *http.Request) {
