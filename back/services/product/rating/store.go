@@ -15,7 +15,7 @@ func NewStore(db *sql.DB) *Store {
 	return &Store{db: db}
 }
 
-func (s *Store) CreateRating(payload *types.CreateProductRatingPayload, userID int) (*types.ProductRating, error) {
+func (s *Store) CreateRating(payload *types.CreateProductRatingPayload, userID int, productID int) (*types.ProductRating, error) {
 	query := `
 		INSERT INTO product_ratings
 			(userId, productId, rating, comment)
@@ -24,7 +24,7 @@ func (s *Store) CreateRating(payload *types.CreateProductRatingPayload, userID i
 
 	res, err := s.db.Exec(query,
 		userID,
-		payload.ProductID,
+		productID,
 		payload.Rating,
 		payload.Comment)
 	if err != nil {

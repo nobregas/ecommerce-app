@@ -3,7 +3,7 @@ package types
 import "time"
 
 type ProductRatingStore interface {
-	CreateRating(*CreateProductRatingPayload, int) (*ProductRating, error)
+	CreateRating(*CreateProductRatingPayload, int, int) (*ProductRating, error)
 	GetRatingsByProduct(int) ([]*ProductRating, error)
 	GetRatingsByUser(int) ([]*ProductRating, error)
 	GetRating(int) (*ProductRating, error)
@@ -21,9 +21,8 @@ type ProductRating struct {
 }
 
 type CreateProductRatingPayload struct {
-	ProductID int    `json:"productId" validate:"required"`
-	Rating    int    `json:"rating" validate:"required,min=1,max=5"`
-	Comment   string `json:"comment" validate:"max=1000"`
+	Rating  int    `json:"rating" validate:"required,min=1,max=5"`
+	Comment string `json:"comment" validate:"max=1000"`
 }
 
 type UpdateProductRatingPayload struct {

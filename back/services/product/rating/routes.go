@@ -1,20 +1,27 @@
 package rating
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/nobregas/ecommerce-mobile-back/services/auth"
 	"github.com/nobregas/ecommerce-mobile-back/types"
+	"github.com/nobregas/ecommerce-mobile-back/utils"
 )
 
 type Handler struct {
-	store     types.ProductRatingStore
-	userStore types.UserStore
+	store        types.ProductRatingStore
+	userStore    types.UserStore
+	productStore types.ProductStore
 }
 
-func NewHandler(store types.ProductRatingStore, userStore types.UserStore) *Handler {
-	return &Handler{store: store, userStore: userStore}
+func NewHandler(
+	store types.ProductRatingStore,
+	userStore types.UserStore,
+	productStore types.ProductStore) *Handler {
+
+	return &Handler{store: store, userStore: userStore, productStore: productStore}
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
@@ -47,18 +54,44 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 
 func (h *Handler) HandleCreateProductRating(w http.ResponseWriter, r *http.Request) {
 	// get product ID from params
+	productID, err := utils.GetParamIdfromPath(r, "productID")
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
 
 	// verify if product exists
+	_, err = h.productStore.GetProductByID(productID)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("product with id %d not found", productID))
+		return
+	}
 
 	// get userID from context
+	userID := auth.GetUserIDFromContext(r.Context())
 
 	// get payload from body
+	var payload types.CreateProductRatingPayload
+	if err := utils.ParseJson(r, &payload); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
 
 	// validate payload
+	if err := utils.Validate.Struct(payload); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload: %v", err))
+		return
+	}
 
 	// create rating
+	rating, err := h.store.CreateRating(&payload, userID, productID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
 
 	// response
+	utils.WriteJson(w, http.StatusCreated, rating)
 }
 
 func (h *Handler) HandleGetProductRatings(w http.ResponseWriter, r *http.Request) {
