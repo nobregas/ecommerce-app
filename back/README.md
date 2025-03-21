@@ -1,7 +1,7 @@
 todos:
     product_discounts (done)
    
-    product_ratings
+    product_ratings (done)
    
     notifications crud
     
