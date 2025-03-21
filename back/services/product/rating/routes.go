@@ -196,5 +196,26 @@ func (h *Handler) HandleDeleteProductRating(w http.ResponseWriter, r *http.Reque
 }
 
 func (h *Handler) HandleDeleteMyProductRating(w http.ResponseWriter, r *http.Request) {
+	// get rating ID from params
+	ratingID, err := utils.GetParamIdfromPath(r, "ratingID")
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
 
+	// verify if rating exists
+	_, err = h.store.GetRating(ratingID)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("rating with id %d not found", ratingID))
+		return
+	}
+
+	// delete rating
+	if err := h.store.DeleteRating(ratingID); err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	// response
+	utils.WriteJson(w, http.StatusNoContent, nil)
 }
