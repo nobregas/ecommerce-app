@@ -1,11 +1,17 @@
 todos:
+    custom errors
+
+    service layer
+
     product_discounts (done)
    
     product_ratings (done)
-   
-    notifications crud
     
     user_favorite products
+    
+    specific product types for front (done)
+
+    notifications crud
     
     user-address
     

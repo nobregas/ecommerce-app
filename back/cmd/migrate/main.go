@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/nobregas/ecommerce-mobile-back/config"
+	"github.com/nobregas/ecommerce-mobile-back/internal/app"
 	"log"
 	"os"
 	"strconv"
@@ -9,13 +11,11 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/mysql"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	configs "github.com/nobregas/ecommerce-mobile-back/config"
-	"github.com/nobregas/ecommerce-mobile-back/db"
 )
 
 func main() {
-	db, err := db.NewMySQLStorage(mysqlCfg.Config{
-		User:                 configs.Envs.DB_USER,
+	db, err := app.NewMySQLStorage(mysqlCfg.Config{
+		User:                 configs.configs.Envs.DB_USER,
 		Passwd:               configs.Envs.DB_PASSWORD,
 		Addr:                 configs.Envs.DB_ADDRESS,
 		DBName:               configs.Envs.DB_NAME,

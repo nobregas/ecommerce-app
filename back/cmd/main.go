@@ -2,12 +2,11 @@ package main
 
 import (
 	"database/sql"
+	"github.com/nobregas/ecommerce-mobile-back/config"
+	"github.com/nobregas/ecommerce-mobile-back/internal/app"
 	"log"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/nobregas/ecommerce-mobile-back/cmd/api"
-	configs "github.com/nobregas/ecommerce-mobile-back/config"
-	"github.com/nobregas/ecommerce-mobile-back/db"
 )
 
 func main() {
@@ -21,14 +20,14 @@ func main() {
 		ParseTime:            true,
 	}
 
-	db, err := db.NewMySQLStorage(cfg)
+	db, err := app.NewMySQLStorage(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	initStorage(db)
 
-	server := api.NewAPIServer(":8080", db)
+	server := app.NewAPIServer(":8080", db)
 	if err := server.Run(); err != nil {
 		log.Fatal(err)
 	}
