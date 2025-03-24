@@ -1,6 +1,10 @@
 package notification
 
-import "github.com/nobregas/ecommerce-mobile-back/internal/shared/types"
+import (
+	"github.com/nobregas/ecommerce-mobile-back/internal/shared/apperrors"
+	"github.com/nobregas/ecommerce-mobile-back/internal/shared/types"
+	"github.com/nobregas/ecommerce-mobile-back/internal/shared/utils"
+)
 
 type Service struct {
 	notificationStore types.NotificationStore
@@ -11,21 +15,57 @@ func NewNotificationService(notificationStore types.NotificationStore) *Service 
 }
 
 func (s *Service) GetMyNotifications(userID int) *[]types.Notification {
-	return nil
+	notifications, err := s.notificationStore.GetMyNotifications(userID)
+	if err != nil {
+		panic(apperrors.NewEntityNotFound("user", userID))
+		return nil
+	}
+
+	return notifications
 }
 
 func (s *Service) GetNotifications() *[]types.Notification {
-	return nil
+	notifications, err := s.notificationStore.GetNotifications()
+	if err != nil {
+		panic(err)
+		return nil
+	}
+
+	return notifications
 }
 
 func (s *Service) GetNotificationByID(notificationID int) *types.Notification {
-	return nil
+	notification, err := s.notificationStore.GetNotificationByID(notificationID)
+	if err != nil {
+		panic(apperrors.NewEntityNotFound("notification", notificationID))
+		return nil
+	}
+
+	return notification
 }
 
-func (s *Service) CreateNotification(payload *types.CreateNotificationPayload) *types.Notification {
-	return nil
+func (s *Service) CreateNotification(payload *types.CreateNotificationPayload, userID int) *types.Notification {
+	if err := utils.Validate.Struct(payload); err != nil {
+		panic(apperrors.NewValidationError("invalid payload", err.Error()))
+		return nil
+	}
+
+	createdNotification, err := s.notificationStore.CreateNotification(payload, userID)
+	if err != nil {
+		panic(err)
+		return nil
+	}
+
+	return createdNotification
 }
 
 func (s *Service) DeleteNotification(notificationID int) {
+	_, err := s.notificationStore.GetNotificationByID(notificationID)
+	if err != nil {
+		panic(apperrors.NewEntityNotFound("Notification", notificationID))
+	}
 
+	if err := s.notificationStore.DeleteNotification(notificationID); err != nil {
+		panic(err)
+	}
 }

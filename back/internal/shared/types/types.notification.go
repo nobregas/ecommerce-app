@@ -6,7 +6,7 @@ type NotificationService interface {
 	GetMyNotifications(userID int) *[]Notification
 	GetNotifications() *[]Notification
 	GetNotificationByID(notificationID int) *Notification
-	CreateNotification(payload *CreateNotificationPayload) *Notification
+	CreateNotification(payload *CreateNotificationPayload, userID int) *Notification
 	DeleteNotification(notificationID int)
 }
 
