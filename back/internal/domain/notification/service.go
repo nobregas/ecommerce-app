@@ -8,6 +8,7 @@ import (
 
 type Service struct {
 	notificationStore types.NotificationStore
+	userStore         types.UserStore
 }
 
 func NewNotificationService(notificationStore types.NotificationStore) *Service {
@@ -15,9 +16,15 @@ func NewNotificationService(notificationStore types.NotificationStore) *Service 
 }
 
 func (s *Service) GetMyNotifications(userID int) *[]types.Notification {
-	notifications, err := s.notificationStore.GetMyNotifications(userID)
+	_, err := s.userStore.GetUserByID(userID)
 	if err != nil {
 		panic(apperrors.NewEntityNotFound("user", userID))
+		return nil
+	}
+
+	notifications, err := s.notificationStore.GetMyNotifications(userID)
+	if err != nil {
+		panic(err)
 		return nil
 	}
 

@@ -186,3 +186,7 @@ func GetUserRoleFromContext(ctx context.Context) types.UserRole {
 func unauthorized(w http.ResponseWriter) {
 	utils.WriteError(w, http.StatusUnauthorized, fmt.Errorf("invalid or missing authentication token"))
 }
+
+func Forbidden(w http.ResponseWriter) {
+	utils.WriteError(w, http.StatusForbidden, fmt.Errorf("actual user doesnt have access"))
+}
