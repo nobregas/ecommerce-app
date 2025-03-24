@@ -26,10 +26,6 @@ func (s *Service) CreateNotification(payload *types.CreateNotificationPayload) *
 	return nil
 }
 
-func (s *Service) UpdateNotification(payload *types.UpdateNotificationPayload, notificationID int) *types.Notification {
-	return nil
-}
-
 func (s *Service) DeleteNotification(notificationID int) {
 
 }

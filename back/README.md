@@ -1,6 +1,6 @@
 todos:
     custom errors
-
+    
     service layer
 
     product_discounts (done)
@@ -28,3 +28,5 @@ todos:
     create /me
 
     create refresh token
+
+    logs

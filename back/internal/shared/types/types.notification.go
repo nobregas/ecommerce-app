@@ -7,7 +7,6 @@ type NotificationService interface {
 	GetNotifications() *[]Notification
 	GetNotificationByID(notificationID int) *Notification
 	CreateNotification(payload *CreateNotificationPayload) *Notification
-	UpdateNotification(payload *UpdateNotificationPayload, notificationID int) *Notification
 	DeleteNotification(notificationID int)
 }
 
@@ -15,8 +14,7 @@ type NotificationStore interface {
 	GetMyNotifications(userID int) (*[]Notification, error)
 	GetNotifications() (*[]Notification, error)
 	GetNotificationByID(notificationID int) (*Notification, error)
-	CreateNotification(payload *CreateNotificationPayload) (*Notification, error)
-	UpdateNotification(payload *UpdateNotificationPayload, notificationID int) (*Notification, error)
+	CreateNotification(payload *CreateNotificationPayload, userID int) (*Notification, error)
 	DeleteNotification(notificationID int) error
 }
 
