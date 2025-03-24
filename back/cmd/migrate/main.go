@@ -15,7 +15,7 @@ import (
 
 func main() {
 	db, err := app.NewMySQLStorage(mysqlCfg.Config{
-		User:                 configs.configs.Envs.DB_USER,
+		User:                 configs.Envs.DB_USER,
 		Passwd:               configs.Envs.DB_PASSWORD,
 		Addr:                 configs.Envs.DB_ADDRESS,
 		DBName:               configs.Envs.DB_NAME,

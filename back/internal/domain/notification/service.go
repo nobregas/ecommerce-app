@@ -11,8 +11,8 @@ type Service struct {
 	userStore         types.UserStore
 }
 
-func NewNotificationService(notificationStore types.NotificationStore) *Service {
-	return &Service{notificationStore: notificationStore}
+func NewNotificationService(notificationStore types.NotificationStore, userStore types.UserStore) *Service {
+	return &Service{notificationStore: notificationStore, userStore: userStore}
 }
 
 func (s *Service) GetMyNotifications(userID int) *[]types.Notification {

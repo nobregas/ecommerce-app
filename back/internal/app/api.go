@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	category "github.com/nobregas/ecommerce-mobile-back/internal/domain/category"
 	"github.com/nobregas/ecommerce-mobile-back/internal/domain/discount"
+	"github.com/nobregas/ecommerce-mobile-back/internal/domain/notification"
 	product "github.com/nobregas/ecommerce-mobile-back/internal/domain/product"
 	"github.com/nobregas/ecommerce-mobile-back/internal/domain/rating"
 	user "github.com/nobregas/ecommerce-mobile-back/internal/domain/user"
@@ -34,12 +35,15 @@ func (s *APIServer) Run() error {
 	categoryStore := category.NewStore(s.db)
 	discountStore := discount.NewStore(s.db)
 	ratingStore := rating.NewStore(s.db)
+	notificationStore := notification.NewStore(s.db)
 
 	productService := product.NewProductService(
 		productStore,
 		userStore,
 		discountStore,
 		ratingStore)
+
+	notificationService := notification.NewNotificationService(notificationStore, userStore)
 
 	// user
 	userHandler := user.NewHandler(userStore)
@@ -60,6 +64,10 @@ func (s *APIServer) Run() error {
 	// rating
 	ratingHandler := rating.NewHandler(ratingStore, userStore, productStore)
 	ratingHandler.RegisterRoutes(subrouter)
+
+	// notification
+	notificationHandler := notification.NewHandler(notificationService, userStore)
+	notificationHandler.RegisterRouter(subrouter)
 
 	log.Printf("Server listening on %s", s.addr)
 
