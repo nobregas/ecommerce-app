@@ -2,11 +2,12 @@ package user
 
 import (
 	"fmt"
-	"github.com/nobregas/ecommerce-mobile-back/config"
-	auth2 "github.com/nobregas/ecommerce-mobile-back/internal/shared/middleware/auth"
+	"net/http"
+
+	configs "github.com/nobregas/ecommerce-mobile-back/config"
+	"github.com/nobregas/ecommerce-mobile-back/internal/shared/middleware/auth"
 	types "github.com/nobregas/ecommerce-mobile-back/internal/shared/types"
 	"github.com/nobregas/ecommerce-mobile-back/internal/shared/utils"
-	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
@@ -23,6 +24,7 @@ func NewHandler(store types.UserStore) *Handler {
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/login", h.HandleLogin).Methods("POST")
 	router.HandleFunc("/register", h.HandleRegister).Methods("POST")
+	router.HandleFunc("/me", auth.WithJwtAuth(h.HandleGetCurrentUser, h.store)).Methods("GET")
 }
 
 func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
@@ -44,12 +46,12 @@ func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !auth2.ComparePasswords(u.Password, []byte(payload.Password)) {
+	if !auth.ComparePasswords(u.Password, []byte(payload.Password)) {
 		utils.WriteError(w, http.StatusUnauthorized, fmt.Errorf("invalid credentials"))
 		return
 	}
 
-	token, err := auth2.CreateJWT([]byte(configs.Envs.JWTSecret), u.ID, u.Role)
+	token, err := auth.CreateJWT([]byte(configs.Envs.JWTSecret), u.ID, u.Role)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
@@ -81,7 +83,7 @@ func (h *Handler) HandleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hashedPassword, err := auth2.HashPassword(payload.Password)
+	hashedPassword, err := auth.HashPassword(payload.Password)
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
@@ -102,4 +104,25 @@ func (h *Handler) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJson(w, http.StatusCreated, user.Sanitize())
+}
+
+func (h *Handler) HandleGetCurrentUser(w http.ResponseWriter, r *http.Request) {
+	userID := auth.GetUserIDFromContext(r.Context())
+
+	user, err := h.store.GetUserByID(userID)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("User not found"))
+		return
+	}
+
+	userDTO := types.UserDTO{
+		ID:         user.ID,
+		FullName:   user.FullName,
+		Email:      user.Email,
+		Cpf:        user.Cpf,
+		ProfileImg: user.ProfileImg,
+		CreatedAt:  user.CreatedAt,
+	}
+
+	utils.WriteJson(w, http.StatusOK, userDTO)
 }

@@ -33,6 +33,15 @@ type LoginUserPayload struct {
 	Password string `json:"password" validate:"required"`
 }
 
+type UserDTO struct {
+	ID         int       `json:"id"`
+	FullName   string    `json:"fullName"`
+	Email      string    `json:"email"`
+	Cpf        string    `json:"cpf"`
+	ProfileImg string    `json:"profileImg"`
+	CreatedAt  time.Time `json:"createdAt"`
+}
+
 func (u *User) Sanitize() map[string]interface{} {
 	return map[string]interface{}{
 		"id":         u.ID,
