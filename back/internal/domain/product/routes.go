@@ -52,6 +52,18 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 			middleware.ErrorHandler,
 		)).Methods(http.MethodGet)
 
+	authRouter.HandleFunc("/product/details/{productID}",
+		utils.Compose(
+			h.handleGetProductDetails,
+			middleware.ErrorHandler,
+		)).Methods(http.MethodGet)
+
+	authRouter.HandleFunc("/product/all/details",
+		utils.Compose(
+			h.handleGetAllSimpleProducts,
+			middleware.ErrorHandler,
+		)).Methods(http.MethodGet)
+
 	// admin routes
 	adminRouter := router.PathPrefix("").Subrouter()
 	adminRouter.Use(
@@ -63,12 +75,23 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 			h.handleCreateProductWithImages,
 			middleware.ErrorHandler,
 		)).Methods(http.MethodPost)
+}
 
-	//router.HandleFunc("/product/{productID}", auth.WithJwtAuth(
-	//	auth.WithAdminAuth(h.handleUpdateProductByID), h.userStore)).Methods(http.MethodPatch)
-	//
-	//router.HandleFunc("/product/{productID}", auth.WithJwtAuth(
-	//	auth.WithAdminAuth(h.handleDeleteProduct), h.userStore)).Methods(http.MethodDelete)
+func (h *Handler) handleGetProductDetails(w http.ResponseWriter, r *http.Request) {
+	userID := auth.GetUserIDFromContext(r.Context())
+	productID := utils.GetParamIdfromPath(r, "productID")
+
+	details := h.productService.GetProductDetails(userID, productID)
+
+	utils.WriteJson(w, http.StatusOK, details)
+}
+
+func (h *Handler) handleGetAllSimpleProducts(w http.ResponseWriter, r *http.Request) {
+	userID := auth.GetUserIDFromContext(r.Context())
+
+	products := h.productService.GetSimpleProducts(userID)
+
+	utils.WriteJson(w, http.StatusOK, products)
 }
 
 func (h *Handler) handleCreateProductWithImages(w http.ResponseWriter, r *http.Request) {

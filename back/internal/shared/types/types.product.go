@@ -13,11 +13,13 @@ type ProductStore interface {
 	UpdateProduct(productID int, payload UpdateProductPayload) error
 	DeleteProduct(productID int) error
 	GetProductsByCategory(categoryID int) ([]*Product, error)
+	GetProductDetails(userID int, productID int) (*ProductDetails, error)
+	GetSimpleProductDetails(userID int) (*[]*SimpleProductObject, error)
 }
 
 type ProductService interface {
-	GetProductDetails() *ProductDetails
-	GetSimpleProducts() *[]SimpleProductObject
+	GetProductDetails(userID int, productID int) *ProductDetails
+	GetSimpleProducts(userID int) *[]*SimpleProductObject
 	GetProducts() []*Product
 	GetProductByID(productID int) *Product
 	GetProductsByCategoryID(categoryID int) []*Product

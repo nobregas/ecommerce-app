@@ -1,6 +1,7 @@
 package product
 
 import (
+	"fmt"
 	"github.com/nobregas/ecommerce-mobile-back/internal/shared/apperrors"
 	"github.com/nobregas/ecommerce-mobile-back/internal/shared/types"
 	"github.com/nobregas/ecommerce-mobile-back/internal/shared/utils"
@@ -27,13 +28,33 @@ func NewProductService(
 	}
 }
 
-func (p *ProductService) GetProductDetails() *types.ProductDetails {
-	return nil
+func (p *ProductService) GetProductDetails(userID int, productID int) *types.ProductDetails {
+	if _, err := p.userStore.GetUserByID(userID); err != nil {
+		panic(apperrors.NewEntityNotFound("user", userID))
+		return nil
+	}
+
+	details, err := p.productStore.GetProductDetails(userID, productID)
+	if err != nil {
+		panic(apperrors.NewEntityNotFound("product", productID))
+		return nil
+	}
+
+	return details
 }
 
-func (p *ProductService) GetSimpleProducts() *[]types.SimpleProductObject {
+func (p *ProductService) GetSimpleProducts(userID int) *[]*types.SimpleProductObject {
+	if _, err := p.userStore.GetUserByID(userID); err != nil {
+		panic(apperrors.NewEntityNotFound("user", userID))
+	}
 
-	return nil
+	products, err := p.productStore.GetSimpleProductDetails(userID)
+	if err != nil {
+		panic(fmt.Errorf("failed to get simple products: %w", err))
+		return nil
+	}
+
+	return products
 }
 
 func (p *ProductService) GetProducts() []*types.Product {

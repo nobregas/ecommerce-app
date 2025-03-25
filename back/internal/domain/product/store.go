@@ -3,7 +3,7 @@ package product
 import (
 	"database/sql"
 	"fmt"
-	types2 "github.com/nobregas/ecommerce-mobile-back/internal/shared/types"
+	types "github.com/nobregas/ecommerce-mobile-back/internal/shared/types"
 	"strings"
 )
 
@@ -15,7 +15,7 @@ func NewStore(db *sql.DB) *Store {
 	return &Store{db: db}
 }
 
-func (s *Store) GetProducts() ([]*types2.Product, error) {
+func (s *Store) GetProducts() ([]*types.Product, error) {
 	// find products
 	rows, err := s.db.Query(
 		`SELECT p.*, i.stock_quantity, i.version
@@ -29,7 +29,7 @@ func (s *Store) GetProducts() ([]*types2.Product, error) {
 
 	// get products and their inventory
 	productIds := make([]int, 0)
-	products := make([]*types2.Product, 0)
+	products := make([]*types.Product, 0)
 	for rows.Next() {
 		p, err := scanRowsIntoProduct(rows)
 		if err != nil {
@@ -63,7 +63,7 @@ func (s *Store) GetProducts() ([]*types2.Product, error) {
 	return products, nil
 }
 
-func (s *Store) GetProductsByCategory(categoryID int) ([]*types2.Product, error) {
+func (s *Store) GetProductsByCategory(categoryID int) ([]*types.Product, error) {
 	rows, err := s.db.Query(`
         SELECT 
             p.id, 
@@ -85,11 +85,11 @@ func (s *Store) GetProductsByCategory(categoryID int) ([]*types2.Product, error)
 	}
 	defer rows.Close()
 
-	var products []*types2.Product
+	var products []*types.Product
 	var productIDs []int
 
 	for rows.Next() {
-		p := new(types2.Product)
+		p := new(types.Product)
 
 		err := rows.Scan(
 			&p.ID,
@@ -129,7 +129,7 @@ func (s *Store) GetProductsByCategory(categoryID int) ([]*types2.Product, error)
 	return products, nil
 }
 
-func (s *Store) GetImagesForProducts(productIDs []int) (map[int][]types2.ProductImage, error) {
+func (s *Store) GetImagesForProducts(productIDs []int) (map[int][]types.ProductImage, error) {
 	query := `
         SELECT id, productId, imageUrl, sortOrder 
         FROM product_images 
@@ -146,10 +146,10 @@ func (s *Store) GetImagesForProducts(productIDs []int) (map[int][]types2.Product
 	}
 	defer rows.Close()
 
-	imagesMap := make(map[int][]types2.ProductImage)
+	imagesMap := make(map[int][]types.ProductImage)
 
 	for rows.Next() {
-		var img types2.ProductImage
+		var img types.ProductImage
 		err := rows.Scan(&img.ID, &img.ProductID, &img.ImageUrl, &img.SortOrder)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan image: %w", err)
@@ -160,7 +160,7 @@ func (s *Store) GetImagesForProducts(productIDs []int) (map[int][]types2.Product
 	return imagesMap, nil
 }
 
-func (s *Store) GetProductByID(productID int) (*types2.Product, error) {
+func (s *Store) GetProductByID(productID int) (*types.Product, error) {
 	// find products
 	row := s.db.QueryRow(`SELECT * FROM products WHERE id = ?`, productID)
 	product, err := scanRowIntoProduct(row)
@@ -183,7 +183,7 @@ func (s *Store) GetProductByID(productID int) (*types2.Product, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var img types2.ProductImage
+		var img types.ProductImage
 		err := rows.Scan(&img.ID, &img.ProductID, &img.ImageUrl, &img.SortOrder)
 		if err != nil {
 			return nil, err
@@ -200,7 +200,7 @@ func (s *Store) GetProductByID(productID int) (*types2.Product, error) {
 	return product, nil
 }
 
-func (s *Store) GetProductCategories(productID int) ([]types2.Category, error) {
+func (s *Store) GetProductCategories(productID int) ([]types.Category, error) {
 	rows, err := s.db.Query(`
         SELECT c.id, c.name, c.imageUrl, c.parentCategoryId 
         FROM product_categories pc
@@ -213,9 +213,9 @@ func (s *Store) GetProductCategories(productID int) ([]types2.Category, error) {
 	}
 	defer rows.Close()
 
-	var categories []types2.Category
+	var categories []types.Category
 	for rows.Next() {
-		var c types2.Category
+		var c types.Category
 		err := rows.Scan(&c.ID, &c.Name, &c.ImageUrl, &c.ParentCategoryId)
 		if err != nil {
 			return nil, err
@@ -226,7 +226,7 @@ func (s *Store) GetProductCategories(productID int) ([]types2.Category, error) {
 	return categories, nil
 }
 
-func (s *Store) CreateProduct(product types2.CreateProductPayload) error {
+func (s *Store) CreateProduct(product types.CreateProductPayload) error {
 	// create transaction
 	tx, err := s.db.Begin()
 	if err != nil {
@@ -271,7 +271,7 @@ func (s *Store) CreateProduct(product types2.CreateProductPayload) error {
 	return tx.Commit()
 }
 
-func (s *Store) CreateProductWithImages(payload types2.CreateProductWithImagesPayload) (*types2.Product, error) {
+func (s *Store) CreateProductWithImages(payload types.CreateProductWithImagesPayload) (*types.Product, error) {
 	tx, err := s.db.Begin()
 	if err != nil {
 		return nil, err
@@ -365,14 +365,14 @@ func (s *Store) UpdateStock(productID int, quantityChange int) error {
 	return tx.Commit()
 }
 
-func (s *Store) GetInventory(productID int) (*types2.Inventory, error) {
+func (s *Store) GetInventory(productID int) (*types.Inventory, error) {
 	const query = `
         SELECT product_id, stock_quantity, version 
         FROM inventory 
         WHERE product_id = ?
     `
 
-	var inventory types2.Inventory
+	var inventory types.Inventory
 
 	err := s.db.QueryRow(query, productID).Scan(
 		&inventory.ProductID,
@@ -389,7 +389,7 @@ func (s *Store) GetInventory(productID int) (*types2.Inventory, error) {
 	return &inventory, nil
 }
 
-func (s *Store) UpdateProduct(productID int, payload types2.UpdateProductPayload) error {
+func (s *Store) UpdateProduct(productID int, payload types.UpdateProductPayload) error {
 	tx, err := s.db.Begin()
 	if err != nil {
 		return err
@@ -445,7 +445,108 @@ func (s *Store) DeleteProduct(productID int) error {
 	return nil
 }
 
-func updateProductImages(tx *sql.Tx, productID int, images []types2.ImageUpdatePayload) error {
+func (s *Store) GetProductDetails(userID int, productID int) (*types.ProductDetails, error) {
+	query := `
+        SELECT 
+            p.id,
+            p.title,
+            p.description,
+            p.basePrice,
+            COALESCE(MAX(CASE WHEN NOW() BETWEEN d.startDate AND d.endDate THEN d.discountPercent END), 0) AS discount,
+            COALESCE(AVG(r.rating), 0) AS avg_rating,
+            EXISTS(SELECT 1 FROM user_favorites uf WHERE uf.userId = ? AND uf.productId = p.id) AS is_favorite
+        FROM products p
+        LEFT JOIN product_discounts d ON p.id = d.productId
+        LEFT JOIN product_ratings r ON p.id = r.productId
+        WHERE p.id = ?
+        GROUP BY p.id
+    `
+	var detail types.ProductDetails
+	var discount float64
+
+	err := s.db.QueryRow(query, userID, productID).Scan(
+		&detail.ID,
+		&detail.Title,
+		&detail.Description,
+		&detail.BasePrice,
+		&discount,
+		&detail.AverageRating,
+		&detail.IsFavorite,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get product details: %w", err)
+	}
+
+	detail.DiscountPercentage = discount
+	detail.Price = detail.BasePrice * (1 - discount/100)
+
+	images, err := s.GetImagesForProducts([]int{productID})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get images: %w", err)
+	}
+	if imgList, exists := images[productID]; exists {
+		detail.Images = imgList
+	}
+
+	return &detail, nil
+}
+
+func (s *Store) GetSimpleProductDetails(userID int) (*[]*types.SimpleProductObject, error) {
+	query := `
+        SELECT 
+            p.id,
+            p.title,
+            p.basePrice,
+            COALESCE(MAX(CASE WHEN NOW() BETWEEN d.startDate AND d.endDate THEN d.discountPercent END), 0) AS discount,
+            COALESCE(AVG(r.rating), 0) AS avg_rating,
+            EXISTS(SELECT 1 FROM user_favorites uf WHERE uf.userId = ? AND uf.productId = p.id) AS is_favorite,
+            (SELECT imageUrl FROM product_images WHERE productId = p.id ORDER BY sortOrder LIMIT 1) AS main_image
+        FROM products p
+        LEFT JOIN product_discounts d ON p.id = d.productId
+        LEFT JOIN product_ratings r ON p.id = r.productId
+        GROUP BY p.id
+    `
+	rows, err := s.db.Query(query, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query simple products: %w", err)
+	}
+	defer rows.Close()
+
+	var products []*types.SimpleProductObject
+	for rows.Next() {
+		var sp types.SimpleProductObject
+		var discount float64
+		var imageUrl string
+
+		err := rows.Scan(
+			&sp.ID,
+			&sp.Title,
+			&sp.BasePrice,
+			&discount,
+			&sp.AverageRating,
+			&sp.IsFavorite,
+			&imageUrl,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan simple product: %w", err)
+		}
+
+		// Calcular preço final
+		sp.Price = sp.BasePrice * (1 - discount/100)
+
+		// Construir objeto de imagem
+		sp.Image = types.ProductImage{
+			ImageUrl:  imageUrl,
+			SortOrder: 0,
+		}
+
+		products = append(products, &sp)
+	}
+
+	return &products, nil
+}
+
+func updateProductImages(tx *sql.Tx, productID int, images []types.ImageUpdatePayload) error {
 	// get current images
 	currentImages, err := getCurrentImages(tx, productID)
 	if err != nil {
@@ -453,11 +554,11 @@ func updateProductImages(tx *sql.Tx, productID int, images []types2.ImageUpdateP
 	}
 
 	toDelete := make([]int, 0)
-	toUpdate := make([]types2.ImageUpdatePayload, 0)
-	toCreate := make([]types2.ImageUpdatePayload, 0)
+	toUpdate := make([]types.ImageUpdatePayload, 0)
+	toCreate := make([]types.ImageUpdatePayload, 0)
 
 	// aux map for received images (consider imageUrl + sortOrder as key)
-	receivedImageMap := make(map[string]types2.ImageUpdatePayload)
+	receivedImageMap := make(map[string]types.ImageUpdatePayload)
 	for _, img := range images {
 		key := fmt.Sprintf("%s|%d", img.ImageUrl, img.SortOrder)
 		receivedImageMap[key] = img
@@ -498,8 +599,8 @@ func updateProductImages(tx *sql.Tx, productID int, images []types2.ImageUpdateP
 	return nil
 }
 
-func getCurrentImages(tx *sql.Tx, productID int) (map[int]types2.ProductImage, error) {
-	images := make(map[int]types2.ProductImage)
+func getCurrentImages(tx *sql.Tx, productID int) (map[int]types.ProductImage, error) {
+	images := make(map[int]types.ProductImage)
 
 	rows, err := tx.Query("SELECT id, imageUrl, sortOrder FROM product_images WHERE productId = ?", productID)
 	if err != nil {
@@ -508,7 +609,7 @@ func getCurrentImages(tx *sql.Tx, productID int) (map[int]types2.ProductImage, e
 	defer rows.Close()
 
 	for rows.Next() {
-		var img types2.ProductImage
+		var img types.ProductImage
 		err := rows.Scan(&img.ID, &img.ImageUrl, &img.SortOrder)
 		if err != nil {
 			return nil, err
@@ -534,7 +635,7 @@ func deleteImages(tx *sql.Tx, ids []int) error {
 	return err
 }
 
-func updateImages(tx *sql.Tx, images []types2.ImageUpdatePayload) error {
+func updateImages(tx *sql.Tx, images []types.ImageUpdatePayload) error {
 	for _, img := range images {
 		_, err := tx.Exec(
 			"UPDATE product_images SET imageUrl = ?, sortOrder = ? WHERE id = ?",
@@ -547,7 +648,7 @@ func updateImages(tx *sql.Tx, images []types2.ImageUpdatePayload) error {
 	return nil
 }
 
-func createImages(tx *sql.Tx, productID int, images []types2.ImageUpdatePayload) error {
+func createImages(tx *sql.Tx, productID int, images []types.ImageUpdatePayload) error {
 	for _, img := range images {
 		_, err := tx.Exec(
 			"INSERT INTO product_images (productId, imageUrl, sortOrder) VALUES (?, ?, ?)",
@@ -560,7 +661,7 @@ func createImages(tx *sql.Tx, productID int, images []types2.ImageUpdatePayload)
 	return nil
 }
 
-func updateProductDetails(tx *sql.Tx, productID int, payload types2.UpdateProductPayload) error {
+func updateProductDetails(tx *sql.Tx, productID int, payload types.UpdateProductPayload) error {
 	query := "UPDATE products SET"
 	args := make([]interface{}, 0)
 	updates := make([]string, 0)
@@ -589,8 +690,8 @@ func updateProductDetails(tx *sql.Tx, productID int, payload types2.UpdateProduc
 	return err
 }
 
-func scanRowsIntoProduct(rows *sql.Rows) (*types2.Product, error) {
-	product := new(types2.Product)
+func scanRowsIntoProduct(rows *sql.Rows) (*types.Product, error) {
+	product := new(types.Product)
 
 	err := rows.Scan(
 		&product.ID,
@@ -610,8 +711,8 @@ func scanRowsIntoProduct(rows *sql.Rows) (*types2.Product, error) {
 	return product, nil
 }
 
-func scanRowIntoProduct(row *sql.Row) (*types2.Product, error) {
-	product := new(types2.Product)
+func scanRowIntoProduct(row *sql.Row) (*types.Product, error) {
+	product := new(types.Product)
 	err := row.Scan(
 		&product.ID,
 		&product.Title,
