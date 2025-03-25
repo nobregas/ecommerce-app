@@ -1,6 +1,6 @@
 import ImageSlider from "@/components/ImageSlider";
-import { Colors } from "@/mobile/constants/Colors";
-import { ProductStrType, ProductType } from "@/mobile/types/type";
+import { Colors } from "@/constants/Colors";
+import { ProductStrType, ProductType } from "@/types/type";
 import { Ionicons } from "@expo/vector-icons";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
@@ -9,6 +9,7 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import Animated, { FadeInDown, SlideInDown } from "react-native-reanimated";
 import { addToCart, getProductDetails } from "@/service/ApiService";
 import { useCartStore } from "@/store/cardBadgeStore";
+import React from "react";
 
 export default function ProductDetails() {
   const { id, productType: productType } = useLocalSearchParams()
@@ -20,7 +21,7 @@ export default function ProductDetails() {
   const [product, setProduct] = useState<ProductType | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const { fetchCartCount } = useCartStore();
-  
+
   useEffect(() => {
     fetchProductDetails()
   }, [])

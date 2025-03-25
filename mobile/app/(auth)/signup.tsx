@@ -2,27 +2,76 @@ import { StyleSheet, Text, TouchableOpacity, View, KeyboardAvoidingView, Platfor
 import React from 'react'
 import { Link, router, Stack } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
-import { Colors } from '@/mobile/constants/Colors'
+import { Colors } from '@/constants/Colors'
 import InputField from '@/components/InputField'
 import SocialLoginButtons from '@/components/SocialLoginButtons'
-import { isValidEmail } from '@/utils/sharedFunctions'
+import { isValidCPF, isValidEmail } from '@/utils/sharedFunctions'
+import { useAuth } from '@/hooks/useAuth'
 
 type Props = {}
 
 const SignUpScreen = (props: Props) => {
-  const [fullName, setFullName] = React.useState({value: "", dirty: false});
-  const [email, setEmail] = React.useState({value: "", dirty: false});
-  const [cpf, setCpf] = React.useState({value: "", dirty: false});
-  const [password, setPassword] = React.useState({value: "", dirty: false});
-  const [confirmPassword, setConfirmPassword] = React.useState({value: "", dirty: false});
-  
-  const handleErrorEmail = () => {
-    
+  const [fullName, setFullName] = React.useState({ value: "", dirty: false });
+  const [email, setEmail] = React.useState({ value: "", dirty: false });
+  const [cpf, setCpf] = React.useState({ value: "", dirty: false });
+  const [password, setPassword] = React.useState({ value: "", dirty: false });
+  const [confirmPassword, setConfirmPassword] = React.useState({ value: "", dirty: false });
+
+  const { handleAuth, loading, error } = useAuth()
+
+  const validateFields = () => {
+    let isValid = true
+
+    if (!fullName.value.trim()) {
+      setFullName(prev => ({ ...prev, dirty: true }))
+      isValid = false
+    }
+
+    if (!isValidEmail(email.value)) {
+      setEmail(prev => ({ ...prev, dirty: true }));
+      isValid = false;
+    }
+    if (!isValidCPF(cpf.value)) {
+      setCpf(prev => ({ ...prev, dirty: true }));
+      isValid = false;
+    }
+
+    if (password.value.length < 3) {
+      setPassword(prev => ({ ...prev, dirty: true }));
+      isValid = false;
+    }
+
+    if (password.value !== confirmPassword.value) {
+      setConfirmPassword(prev => ({ ...prev, dirty: true }));
+      isValid = false;
+    }
+
+    return isValid
   }
 
+  const getEmailError = () => {
+    if (!email.dirty) return ""
+    if (!email.value) return "Email is required"
+    if (!isValidEmail(email.value)) return "Invalid email"
+    return ""
+  }
 
-  const handleSubmit = () => {
-    
+  const getCpfError = () => {
+    if (!cpf.dirty) return '';
+    if (!cpf.value) return 'CPF is required';
+    if (!isValidCPF(cpf.value)) return 'Invalid CPF';
+    return '';
+  };
+
+  const handleSubmit = async () => {
+    if (!validateFields()) return
+
+    await handleAuth("register", {
+      fullName: fullName.value,
+      email: email.value,
+      cpf: cpf.value,
+      password: password.value
+    }, "/(auth)/signin");
   }
 
   return (
@@ -46,33 +95,44 @@ const SignUpScreen = (props: Props) => {
         <Text style={styles.title}>Create an account</Text>
         <InputField
           placeholder='Full Name'
-          placeholderTextColor={Colors.gray}
-          autoCapitalize="words"
+          value={fullName.value}
+          onChangeText={(text) => setFullName({ value: text, dirty: true })}
+          error={fullName.dirty && !fullName.value ? 'Full name is required' : ''}
         />
         <InputField
           placeholder='Email Address'
-          placeholderTextColor={Colors.gray}
-          autoCapitalize='none'
-          keyboardType='email-address'
+          value={email.value}
+          onChangeText={(text) => setEmail({ value: text, dirty: true })}
+          error={getEmailError()}
         />
         <InputField
-          placeholder='Cpf'
-          placeholderTextColor={Colors.gray}
-          keyboardType='numeric'
+          placeholder='CPF'
+          value={cpf.value}
+          onChangeText={(text) => setCpf({ value: text, dirty: true })}
+          error={getCpfError()}
         />
         <InputField
           placeholder='Password'
-          placeholderTextColor={Colors.gray}
-          secureTextEntry
+          value={password.value}
+          onChangeText={(text) => setPassword({ value: text, dirty: true })}
+          error={password.dirty && password.value.length < 3 ? 'Password must be at least 3 characters' : ''}
         />
         <InputField
           placeholder='Confirm Password'
-          placeholderTextColor={Colors.gray}
-          secureTextEntry
+          value={confirmPassword.value}
+          onChangeText={(text) => setConfirmPassword({ value: text, dirty: true })}
+          error={confirmPassword.dirty && password.value !== confirmPassword.value ? 'Passwords do not match' : ''}
         />
 
-        <TouchableOpacity style={styles.btn} onPress={handleSubmit}>
-          <Text style={styles.btnTxt}>Create an Account</Text>
+        {error && <Text style={styles.error}>{error}</Text>}
+        <TouchableOpacity
+          style={[styles.btn, loading && styles.disabledBtn]}
+          onPress={handleSubmit}
+          disabled={loading}
+        >
+          <Text style={styles.btnTxt}>
+            {loading ? 'Loading...' : 'Create an Account'}
+          </Text>
         </TouchableOpacity>
 
         <View style={styles.loginTxtWrapper}>
@@ -154,6 +214,10 @@ const styles = StyleSheet.create({
   },
   error: {
     color: 'red',
-    fontSize: 16
+    fontSize: 14,
+    marginBottom: 10,
+  },
+  disabledBtn: {
+    opacity: 0.7,
   }
 });

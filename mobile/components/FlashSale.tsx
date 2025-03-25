@@ -1,9 +1,10 @@
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native'
-import { Colors } from '@/mobile/constants/Colors'
+import { Colors } from '@/constants/Colors'
 import { Ionicons } from '@expo/vector-icons'
 import { useEffect, useState } from 'react'
-import { ProductType } from '@/mobile/types/type'
+import { ProductType } from '@/types/type'
 import ProductItem from './ProductItem'
+import React from 'react'
 
 type Props = {
     products: ProductType[]

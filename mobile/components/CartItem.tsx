@@ -1,8 +1,8 @@
 
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import React from 'react'
-import { CartItemType } from '@/mobile/types/type'
-import { Colors } from '@/mobile/constants/Colors'
+import { CartItemType } from '@/types/type'
+import { Colors } from '@/constants/Colors'
 import { Ionicons } from '@expo/vector-icons'
 import { Image } from "expo-image"
 import { Link } from 'expo-router'

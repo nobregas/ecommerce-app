@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native'
 import React from 'react'
-import { CategoryType } from '@/mobile/types/type'
-import { Colors } from '@/mobile/constants/Colors'
+import { CategoryType } from '@/types/type'
+import { Colors } from '@/constants/Colors'
 import { Image } from "expo-image"
 
 type Props = {

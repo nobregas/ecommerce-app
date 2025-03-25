@@ -1,10 +1,11 @@
-import { Colors } from "@/mobile/constants/Colors";
-import { ProductStrType, ProductType } from "@/mobile/types/type";
+import { Colors } from "@/constants/Colors";
+import { ProductStrType, ProductType } from "@/types/type";
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { Image } from "expo-image"
+import React from "react";
 
 type Props = {
     item: ProductType;

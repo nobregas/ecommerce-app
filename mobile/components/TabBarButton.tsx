@@ -1,7 +1,7 @@
-import { Colors } from "@/mobile/constants/Colors";
-import { icon } from "@/mobile/constants/icons";
+import { Colors } from "@/constants/Colors";
+import { icon } from "@/constants/icons";
 import { useCartStore } from "@/store/cardBadgeStore";
-
+import React from "react"
 import { Pressable, StyleSheet, Text, View } from "react-native"
 
 

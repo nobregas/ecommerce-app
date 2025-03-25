@@ -1,10 +1,11 @@
 import { View, StyleSheet, LayoutChangeEvent } from 'react-native';
-import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import {BottomTabBarProps} from '@react-navigation/bottom-tabs';
 import TabBarButton from './TabBarButton';
-import { Colors } from '@/mobile/constants/Colors';
+import { Colors } from '@/constants/Colors';
 import { useEffect, useState } from 'react';
 import { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import Animated from 'react-native-reanimated';
+import React from 'react';
 
 export default function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     const [dimensions, setDimensions] = useState({ width: 300, height: 20 });
@@ -46,7 +47,7 @@ export default function TabBar({ state, descriptors, navigation }: BottomTabBarP
                     width: buttonWidth / 2
                 }]}
             />
-            {state.routes.map((route, index) => {
+            {state.routes.map((route: any, index: any) => {
                 const { options } = descriptors[route.key];
                 const label =
                     options.tabBarLabel !== undefined

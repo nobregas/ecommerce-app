@@ -1,16 +1,18 @@
-import { Colors } from "@/mobile/constants/Colors";
+import { Colors } from "@/constants/Colors";
 import React from "react";
 import { StyleSheet, TextInput, TextInputProps, Text } from "react-native";
 
 interface InputFieldProps extends TextInputProps {
+    error?: string
 }
-const inputField = ({ ...props }: InputFieldProps) => {
+const inputField = ({ error, ...props }: InputFieldProps) => {
     return (
         <>
             <TextInput
                 {...props}
-                style={styles.inputField}
+                style={[styles.inputField, error && styles.errorInput]}
             />
+            {error && <Text style={styles.errorText}>{error}</Text>}
         </>
     )
 }
@@ -28,5 +30,15 @@ const styles = StyleSheet.create({
         color: Colors.black,
         marginBottom: 20,
     },
-
+    errorInput: {
+        borderColor: Colors.red,
+        borderWidth: 1,
+    },
+    errorText: {
+        color: 'red',
+        fontSize: 12,
+        marginTop: -10,
+        marginBottom: 15,
+        alignSelf: 'flex-start',
+    },
 })

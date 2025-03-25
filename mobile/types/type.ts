@@ -35,4 +35,23 @@ export interface NotificationType {
   timestamp: string;
 }
 
+export interface UserType {
+  id: number;
+  name: string;
+  email: string;
+  cpf: string;
+}
+
+export interface RegisterType {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export interface LoginType {
+  email: string;
+  password: string;
+}
+
 export type ProductStrType = "regular" | "sale";

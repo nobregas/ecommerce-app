@@ -1,8 +1,8 @@
 import React, { memo } from "react";
 import { View, TouchableOpacity, FlatList, Text, StyleSheet } from "react-native";
 import ProductItem from "./ProductItem";
-import { Colors } from "@/mobile/constants/Colors";
-import { ProductType } from "@/mobile/types/type";
+import { Colors } from "@/constants/Colors";
+import { ProductType } from "@/types/type";
 
 type Props = {
     products: ProductType[];

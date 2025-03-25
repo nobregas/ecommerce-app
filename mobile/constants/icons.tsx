@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons"
 import { Image, StyleSheet } from "react-native"
+import React from "react";
 
 export const icon = {
     index: ({ color }: { color: string }) => (

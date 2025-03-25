@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native'
 import React from 'react'
-import { Colors } from '@/mobile/constants/Colors'
+import { Colors } from '@/constants/Colors'
 
 type Props = {
     items: string[]

@@ -1,4 +1,4 @@
-import { Colors } from "@/mobile/constants/Colors";
+import { Colors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { Href, Link } from "expo-router";
 import React from "react";
