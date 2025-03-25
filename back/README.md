@@ -11,7 +11,7 @@ todos:
     
     specific product types for front (done)
 
-    notifications crud
+    notifications crud (done)
     
     user-address
     
