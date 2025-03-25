@@ -1,12 +1,13 @@
 package product
 
 import (
+	"net/http"
+
 	"github.com/nobregas/ecommerce-mobile-back/internal/shared/apperrors"
 	"github.com/nobregas/ecommerce-mobile-back/internal/shared/middleware"
 	"github.com/nobregas/ecommerce-mobile-back/internal/shared/middleware/auth"
 	types "github.com/nobregas/ecommerce-mobile-back/internal/shared/types"
 	"github.com/nobregas/ecommerce-mobile-back/internal/shared/utils"
-	"net/http"
 
 	"github.com/gorilla/mux"
 )
@@ -154,15 +155,4 @@ func (h *Handler) handleGetProductsByCategoryID(w http.ResponseWriter, r *http.R
 	products := h.productService.GetProductsByCategoryID(categoryID)
 
 	utils.WriteJson(w, http.StatusOK, products)
-}
-
-func (h *Handler) getProductDetails(w http.ResponseWriter, r *http.Request) {
-	// get product id from params
-	// get product from store
-	// response
-}
-
-func (h *Handler) getSimpleProducts(w http.ResponseWriter, r *http.Request) {
-	// get products from store
-	// response
 }

@@ -3,14 +3,15 @@ package auth
 import (
 	"context"
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/nobregas/ecommerce-mobile-back/config"
-	types "github.com/nobregas/ecommerce-mobile-back/internal/shared/types"
-	"github.com/nobregas/ecommerce-mobile-back/internal/shared/utils"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/mux"
+	configs "github.com/nobregas/ecommerce-mobile-back/config"
+	types "github.com/nobregas/ecommerce-mobile-back/internal/shared/types"
+	"github.com/nobregas/ecommerce-mobile-back/internal/shared/utils"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -181,6 +182,12 @@ func GetUserIDFromContext(ctx context.Context) int {
 func GetUserRoleFromContext(ctx context.Context) types.UserRole {
 	role, _ := ctx.Value(userRoleKey).(types.UserRole)
 	return role
+}
+
+// GetUserKeyForContext returns the key used for user ID in the context
+// Helper function for tests
+func GetUserKeyForContext() contextKey {
+	return userKey
 }
 
 func unauthorized(w http.ResponseWriter) {
