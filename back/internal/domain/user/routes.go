@@ -74,12 +74,12 @@ func (h *Handler) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, err := h.store.GetUserByEmail(payload.Email); err == nil {
-		utils.WriteError(w, http.StatusConflict, fmt.Errorf("email já cadastrado"))
+		utils.WriteError(w, http.StatusConflict, fmt.Errorf("email already registered"))
 		return
 	}
 
 	if _, err := h.store.GetUserByCPF(payload.Cpf); err == nil {
-		utils.WriteError(w, http.StatusConflict, fmt.Errorf("CPF já cadastrado"))
+		utils.WriteError(w, http.StatusConflict, fmt.Errorf("CPF already registered"))
 		return
 	}
 
@@ -111,7 +111,7 @@ func (h *Handler) HandleGetCurrentUser(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.store.GetUserByID(userID)
 	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("User not found"))
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("user not found"))
 		return
 	}
 
