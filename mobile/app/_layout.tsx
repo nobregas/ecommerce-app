@@ -4,6 +4,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import React from 'react';
+import { UserProvider } from '../context/UserContext';
 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -25,10 +26,12 @@ export default function RootLayout() {
   }
 
   return (
+    <UserProvider>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)/signin" options={{ presentation: 'modal' }} />
         <Stack.Screen name="(auth)/signup" options={{ presentation: 'modal' }} />
       </Stack>
+    </UserProvider>
   );
 }
