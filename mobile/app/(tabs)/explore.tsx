@@ -1,19 +1,18 @@
 import { FlatList, StyleSheet, Text, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { CategoryType } from '@/types/type'
 import { Stack } from 'expo-router'
 import { useHeaderHeight } from '@react-navigation/elements'
 import { Colors } from '@/constants/Colors'
 import Animated, { FadeInDown } from 'react-native-reanimated'
-import { getCategories } from '@/service/ApiService'
 import { Image } from "expo-image"
+import categoryService, { Category } from '@/service/categoryService'
 
 type Props = {}
 
 const ExploreScreen = (props: Props) => {
 
   const headerHeight = useHeaderHeight()
-  const [categories, setCategories] = useState<CategoryType[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
 
   useEffect(() => {
     fetchCategories()
@@ -21,7 +20,7 @@ const ExploreScreen = (props: Props) => {
 
   const fetchCategories = async () => {
     try {
-      const categoriesData = await getCategories()
+      const categoriesData = await categoryService.getAllCategories()
 
       setCategories(categoriesData)
 
@@ -44,7 +43,7 @@ const ExploreScreen = (props: Props) => {
           renderItem={({ item, index }) => (
             <Animated.View style={styles.itemWrapper} entering={FadeInDown.delay(300 + index * 100).duration(500)}>
               <Text style={styles.itemTitle}>{item.name}</Text>
-              <Image source={{ uri: item.image }} style={{ width: 100, height: 100, borderRadius: 10 }} />
+              <Image source={{ uri: item.imageUrl }} style={{ width: 100, height: 100, borderRadius: 10 }} />
             </Animated.View>
           )}
         />

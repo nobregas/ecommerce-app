@@ -1,18 +1,18 @@
-import React, { memo } from "react";
+import React, { memo} from "react";
 import { View, TouchableOpacity, FlatList, Text, StyleSheet } from "react-native";
 import ProductItem from "./ProductItem";
 import { Colors } from "@/constants/Colors";
-import { ProductType } from "@/types/type";
+import { SimpleProductObject } from "@/service/productService";
 
 type Props = {
-    products: ProductType[];
+    products: SimpleProductObject[];
     flatlist?: boolean;
 };
 
 const productType = "regular";
 
 const ProductList = ({ products, flatlist = true }: Props) => {
-    const renderItem = ({ item, index }: { item: ProductType; index: number }) => (
+    const renderItem = ({ item, index }: { item: SimpleProductObject; index: number }) => (
         <ProductItem item={item} index={index} productType={productType} />
     );
 

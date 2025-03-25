@@ -10,6 +10,8 @@ import Animated, { FadeInDown, SlideInDown } from "react-native-reanimated";
 import { addToCart, getProductDetails } from "@/service/ApiService";
 import { useCartStore } from "@/store/cardBadgeStore";
 import React from "react";
+import productService, {ProductDetailsType} from "@/service/productService";
+import HeartButton from "@/components/HeartButton";
 
 export default function ProductDetails() {
   const { id, productType: productType } = useLocalSearchParams()
@@ -18,7 +20,7 @@ export default function ProductDetails() {
   const productId = Array.isArray(id) ? id[0] : id
   const productTypeStr = Array.isArray(productType) ? productType[0] : productType
 
-  const [product, setProduct] = useState<ProductType | null>(null)
+  const [product, setProduct] = useState<ProductDetailsType | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const { fetchCartCount } = useCartStore();
 
@@ -30,7 +32,7 @@ export default function ProductDetails() {
     if (!productId || !productTypeStr) return;
 
     try {
-      const data = await getProductDetails(productId, productTypeStr as ProductStrType);
+      const data = await productService.getProductDetails(parseInt(productId));
       setProduct(data);
     } finally {
       setLoading(false);
@@ -39,14 +41,18 @@ export default function ProductDetails() {
 
   const handleAddToCart = async () => {
     try {
-      const response = await addToCart(product!, productTypeStr as ProductStrType);
+      //const response = await addToCart(product!, productTypeStr as ProductStrType);
       fetchCartCount()
-      alert(response);
+      //alert(response);
     } catch (error) {
       alert("Error adding to cart");
     }
   }
 
+  const getProductImages = (): string[] => {
+    const imagesUrls: string[] = product?.images?.map((image: any) => image.imageUrl) || [];
+    return imagesUrls
+  }
 
   if (loading) {
     return (
@@ -96,7 +102,7 @@ export default function ProductDetails() {
       <ScrollView style={{ marginTop: headerHeight, marginBottom: 90 }}>
         {product && (
           <Animated.View entering={FadeInDown.delay(300).duration(500)}>
-            <ImageSlider images={product.images} />
+            <ImageSlider images={getProductImages()} />
           </Animated.View>
         )}
         {product && (
@@ -105,12 +111,10 @@ export default function ProductDetails() {
               <View style={styles.productIcons}>
                 <Ionicons name="star" size={18} color={Colors.yellow} />
                 <Text style={styles.rating}>
-                  4.7 <Text>({numberOfRating})</Text>
+                  {product.averageRating}
                 </Text>
               </View>
-              <TouchableOpacity>
-                <Ionicons name="heart-outline" size={20} color={Colors.black} />
-              </TouchableOpacity>
+              <HeartButton productId={product.id} initialIsFavorited={product.isFavorite} />
             </Animated.View >
 
             <Animated.Text
@@ -121,9 +125,9 @@ export default function ProductDetails() {
             </Animated.Text>
 
             <Animated.View style={styles.priceWrapper} entering={FadeInDown.delay(900).duration(500)}>
-              <Text style={styles.priceTxt}>R${product.price}</Text>
-              <View style={styles.discountWrapper}><Text style={styles.discount}>6% Off</Text></View>
-              <Text style={styles.oldPrice}>R${product.price + 2}</Text>
+              <Text style={styles.priceTxt}>R${product.price.toFixed(2)}</Text>
+              <View style={styles.discountWrapper}><Text style={styles.discount}>{product.discountPercentage}%</Text></View>
+              <Text style={styles.oldPrice}>R${product.basePrice}</Text>
             </Animated.View>
 
             <Animated.Text

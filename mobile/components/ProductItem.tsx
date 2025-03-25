@@ -5,10 +5,12 @@ import { Link } from "expo-router";
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { Image } from "expo-image"
-import React from "react";
+import React, { useEffect } from "react";
+import productService, { SimpleProductObject } from "@/service/productService";
+import HeartButton from "./HeartButton";
 
 type Props = {
-    item: ProductType;
+    item: SimpleProductObject;
     index: number
     productType: ProductStrType
 }
@@ -16,6 +18,12 @@ type Props = {
 const width = Dimensions.get("window").width - 40;
 
 export default function ProductItem({ item, index, productType }: Props) {
+    const [isFavorited, setIsFavorited] = React.useState(item.isFavorite);
+
+    useEffect(() => {
+        setIsFavorited(item.isFavorite)
+    }, [isFavorited])
+
     return (
         <Link href={{
             pathname: "/product-details/[id]",
@@ -23,15 +31,22 @@ export default function ProductItem({ item, index, productType }: Props) {
         }} asChild>
             <TouchableOpacity>
                 <Animated.View style={styles.container} entering={FadeInDown.delay(300 + index * 100).duration(500)}>
-                    <Image source={{ uri: item.images[0] }} style={styles.productImage} />
-                    <TouchableOpacity style={styles.bookmarkBtn}>
-                        <Ionicons name="heart-outline" size={22} color={Colors.black} />
-                    </TouchableOpacity>
+                    <Image
+                        source={{ uri: item.image }}
+                        style={styles.productImage}
+                        placeholder={"https://via.placeholder.com/150"}
+                    />
+                    <HeartButton
+                        productId={item.id}
+                        initialIsFavorited={item.isFavorite}
+                        size={20}
+                        style={styles.bookmarkBtn}
+                    />
                     <View style={styles.productInfo}>
                         <Text style={styles.price}>R${item.price}</Text>
                         <View style={styles.ratingWrapper}>
                             <Ionicons name="star" size={20} color={Colors.yellow} />
-                            <Text style={styles.rating}>4.7</Text>
+                            <Text style={styles.rating}>{item.averageRating}</Text>
                         </View>
                     </View>
                     <Text style={styles.title}>{item.title}</Text>
@@ -54,14 +69,7 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         marginBottom: 10
     },
-    bookmarkBtn: {
-        position: "absolute",
-        right: 20,
-        top: 20,
-        backgroundColor: Colors.transparentWhite,
-        padding: 5,
-        borderRadius: 30
-    },
+    
     title: {
         fontSize: 14,
         fontWeight: "600",
@@ -87,5 +95,12 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: Colors.gray
     },
-
+    bookmarkBtn: {
+        position: "absolute",
+        right: 20,
+        top: 20,
+        backgroundColor: Colors.transparentWhite,
+        padding: 5,
+        borderRadius: 30
+    },
 });

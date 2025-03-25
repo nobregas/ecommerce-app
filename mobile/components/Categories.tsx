@@ -1,11 +1,12 @@
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native'
 import React from 'react'
-import { CategoryType } from '@/types/type'
+
 import { Colors } from '@/constants/Colors'
 import { Image } from "expo-image"
+import { Category } from '@/service/categoryService'
 
 type Props = {
-    categories: CategoryType[]
+    categories: Category[]
 }
 
 const Categories = ({ categories }: Props) => {
@@ -25,7 +26,7 @@ const Categories = ({ categories }: Props) => {
                 renderItem={({ item, index }) => (
                     <TouchableOpacity>
                         <View style={styles.item}>
-                            <Image source={{ uri: item.image }} style={styles.itemImg} />
+                            <Image source={{ uri: item.imageUrl }} style={styles.itemImg} />
                             <Text>{item.name}</Text>
                         </View>
                     </TouchableOpacity>
