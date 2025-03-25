@@ -12,6 +12,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 type APIServer struct {
@@ -27,6 +28,7 @@ func NewAPIServer(addr string, db *sql.DB) *APIServer {
 }
 
 func (s *APIServer) Run() error {
+
 	router := mux.NewRouter()
 	subrouter := router.PathPrefix("/api/v1").Subrouter()
 
@@ -69,7 +71,15 @@ func (s *APIServer) Run() error {
 	notificationHandler := notification.NewHandler(notificationService, userStore)
 	notificationHandler.RegisterRouter(subrouter)
 
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"}, // Permitir todas as origens (evite em produção)
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Authorization", "Content-Type"},
+		AllowCredentials: true,
+	})
+	handler := c.Handler(router)
+
 	log.Printf("Server listening on %s", s.addr)
 
-	return http.ListenAndServe(s.addr, router)
+	return http.ListenAndServe(s.addr, handler)
 }
