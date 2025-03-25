@@ -65,5 +65,5 @@ func (h *Handler) handleRemoveFavorite(w http.ResponseWriter, r *http.Request) {
 	productID := utils.GetParamIdfromPath(r, "productID")
 
 	h.favoriteService.RemoveFavorite(userID, productID)
-	utils.WriteJson(w, http.StatusNoContent, nil)
+	w.WriteHeader(http.StatusNoContent)
 }

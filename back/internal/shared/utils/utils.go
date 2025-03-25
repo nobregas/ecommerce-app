@@ -23,6 +23,11 @@ func ParseJson(r *http.Request, payload any) error {
 }
 
 func WriteJson(w http.ResponseWriter, status int, v any) {
+	if status == http.StatusNoContent || status == http.StatusNotModified {
+		w.WriteHeader(status)
+		return
+	}
+
 	w.Header().Add("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(status)
 

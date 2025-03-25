@@ -1,5 +1,6 @@
 todos:
-    custom errors
+    
+    custom errors (done)
     
     service layer
 
@@ -7,7 +8,7 @@ todos:
    
     product_ratings (done)
     
-    user_favorite products (doing)
+    user_favorite products (done)
     
     specific product types for front (done)
 

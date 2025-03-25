@@ -16,7 +16,7 @@ func NewStore(db *sql.DB) *Store {
 
 func (s *Store) AddFavorite(userID int, productID int) (*types.UserFavorite, error) {
 	query := `
-		INSERT INTO user_favorites (user_id, product_id)
+		INSERT INTO user_favorites (userId, productId)
 		VALUES (?, ?)
 	`
 	_, err := s.db.Exec(query, userID, productID)
@@ -83,7 +83,7 @@ func (s *Store) GetFavorite(userID int, productID int) (*types.UserFavorite, err
 	query := `
 		SELECT userId, productId, addedAt
 		FROM user_favorites
-		WHERE user_id = ? AND productId = ?
+		WHERE userId = ? AND productId = ?
 	`
 
 	row := s.db.QueryRow(query, userID, productID)
@@ -99,7 +99,7 @@ func (s *Store) IsFavorited(userID int, productID int) (bool, error) {
         SELECT EXISTS(
             SELECT 1 
             FROM user_favorites 
-            WHERE user_id = ? AND product_id = ?
+            WHERE userId = ? AND productId = ?
         )
     `
 
