@@ -6,7 +6,7 @@ require (
 	github.com/go-playground/validator/v10 v10.25.0
 	github.com/go-sql-driver/mysql v1.9.0
 	github.com/gorilla/mux v1.8.1
-	gitlab.com/flimzy/httpe v0.0.0-20231112220855-6303bcec02b6
+	github.com/rs/cors v1.11.1
 )
 
 require (

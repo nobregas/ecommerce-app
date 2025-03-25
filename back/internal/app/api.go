@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	category "github.com/nobregas/ecommerce-mobile-back/internal/domain/category"
 	"github.com/nobregas/ecommerce-mobile-back/internal/domain/discount"
+	"github.com/nobregas/ecommerce-mobile-back/internal/domain/favorite"
 	"github.com/nobregas/ecommerce-mobile-back/internal/domain/notification"
 	product "github.com/nobregas/ecommerce-mobile-back/internal/domain/product"
 	"github.com/nobregas/ecommerce-mobile-back/internal/domain/rating"
@@ -38,12 +39,18 @@ func (s *APIServer) Run() error {
 	discountStore := discount.NewStore(s.db)
 	ratingStore := rating.NewStore(s.db)
 	notificationStore := notification.NewStore(s.db)
+	favoriteStore := favorite.NewStore(s.db)
 
 	productService := product.NewProductService(
 		productStore,
 		userStore,
 		discountStore,
 		ratingStore)
+
+	favoriteService := favorite.NewService(
+		favoriteStore,
+		userStore,
+		productStore)
 
 	notificationService := notification.NewNotificationService(notificationStore, userStore)
 
@@ -70,6 +77,10 @@ func (s *APIServer) Run() error {
 	// notification
 	notificationHandler := notification.NewHandler(notificationService, userStore)
 	notificationHandler.RegisterRouter(subrouter)
+
+	// favorite
+	favoriteHandler := favorite.NewHandler(favoriteService, userStore)
+	favoriteHandler.RegisterRouter(subrouter)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"}, // Permitir todas as origens (evite em produção)

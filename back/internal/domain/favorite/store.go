@@ -94,6 +94,24 @@ func (s *Store) GetFavorite(userID int, productID int) (*types.UserFavorite, err
 	return favorite, nil
 }
 
+func (s *Store) IsFavorited(userID int, productID int) (bool, error) {
+	query := `
+        SELECT EXISTS(
+            SELECT 1 
+            FROM user_favorites 
+            WHERE user_id = ? AND product_id = ?
+        )
+    `
+
+	var exists bool
+	err := s.db.QueryRow(query, userID, productID).Scan(&exists)
+	if err != nil {
+		return false, fmt.Errorf("failed to check favorite status: %w", err)
+	}
+
+	return exists, nil
+}
+
 func scanRow(row *sql.Row) (*types.UserFavorite, error) {
 	userFavorite := new(types.UserFavorite)
 	err := row.Scan(

@@ -10,6 +10,7 @@ const (
 	Unauthorized ErrorType = "UNAUTHORIZED"
 	Internal     ErrorType = "INTERNAL"
 	FORBIDDEN    ErrorType = "FORBIDDEN"
+	CONFLICT     ErrorType = "CONFLICT"
 )
 
 type AppError struct {
