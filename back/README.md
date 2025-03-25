@@ -7,7 +7,7 @@ todos:
    
     product_ratings (done)
     
-    user_favorite products
+    user_favorite products (doing)
     
     specific product types for front (done)
 
