@@ -30,7 +30,6 @@ const HomeScreen = () => {
         productService.getAllProducts(),
       ]);
 
-      console.log("Dados recebidos: ", productData)
       setCategories(categoryData);
       //setSaleProducts(saleProductData);
       setProducts(productData);
