@@ -2,18 +2,16 @@ import { FlatList, StyleSheet, Text, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useHeaderHeight } from '@react-navigation/elements'
 import { Stack } from 'expo-router'
-import { NotificationType } from '@/types/type'
 import { Ionicons } from '@expo/vector-icons'
 import { Colors } from '@/constants/Colors'
 import Animated, { FadeInDown } from 'react-native-reanimated'
-import { getNotifications } from '@/service/ApiService'
-
+import notificationService, { Notification } from '@/service/notificationService'
 type Props = {}
 
 const NotificationsScreen = (props: Props) => {
   const headerHeight = useHeaderHeight()
 
-  const [notifications, setNotifications] = useState<NotificationType[]>([])
+  const [notifications, setNotifications] = useState<Notification[]>([])
 
   useEffect(() => {
     fetchNotifications()
@@ -21,7 +19,7 @@ const NotificationsScreen = (props: Props) => {
 
   const fetchNotifications = async () => {
       try {
-        const categoriesData = await getNotifications()
+        const categoriesData = await notificationService.getNotifications()
   
         setNotifications(categoriesData)
   
@@ -29,7 +27,6 @@ const NotificationsScreen = (props: Props) => {
         console.log(error)
       }
     }
-  
 
   return (
     <>
@@ -51,7 +48,7 @@ const NotificationsScreen = (props: Props) => {
               <View style={styles.notificationInfo}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Text style={styles.notificationTitle}>{item.title}</Text>
-                  <Text style={styles.notificationMessage}>{item.timestamp}</Text>
+                  <Text style={styles.notificationMessage}>{item.createdAt}</Text>
                 </View>
                 <Text style={styles.notificationMessage}>{item.message}</Text>
               </View>
