@@ -3,10 +3,11 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/nobregas/ecommerce-mobile-back/internal/shared/apperrors"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/nobregas/ecommerce-mobile-back/internal/shared/apperrors"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
