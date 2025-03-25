@@ -14,11 +14,11 @@ todos:
 
     notifications crud (done)
     
-    user-address
+    user-address 
     
     user profile_img (done) 
     
-    cart crud
+    cart crud (next step)
 
     order-history 
 
@@ -29,5 +29,7 @@ todos:
     create /me
 
     create refresh token
+
+    ai recommendation
 
     logs
