@@ -15,10 +15,14 @@ todos:
     notifications crud (done)
     
     user-address 
-    
+
+    when create a user also create a cart    
+
     user profile_img (done) 
     
     cart crud (next step)
+
+    escurecer placeholder de login / register
 
     order-history 
 
