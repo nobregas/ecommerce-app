@@ -2,6 +2,10 @@ package app
 
 import (
 	"database/sql"
+	"log"
+	"net/http"
+
+	"github.com/nobregas/ecommerce-mobile-back/internal/domain/cart"
 	category "github.com/nobregas/ecommerce-mobile-back/internal/domain/category"
 	"github.com/nobregas/ecommerce-mobile-back/internal/domain/discount"
 	"github.com/nobregas/ecommerce-mobile-back/internal/domain/favorite"
@@ -9,8 +13,6 @@ import (
 	product "github.com/nobregas/ecommerce-mobile-back/internal/domain/product"
 	"github.com/nobregas/ecommerce-mobile-back/internal/domain/rating"
 	user "github.com/nobregas/ecommerce-mobile-back/internal/domain/user"
-	"log"
-	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
@@ -40,12 +42,20 @@ func (s *APIServer) Run() error {
 	ratingStore := rating.NewStore(s.db)
 	notificationStore := notification.NewStore(s.db)
 	favoriteStore := favorite.NewStore(s.db)
+	cartStore := cart.NewStore(s.db)
+
+	cartService := cart.NewService(
+		cartStore,
+		productStore,
+		discountStore,
+	)
 
 	productService := product.NewProductService(
 		productStore,
 		userStore,
 		discountStore,
-		ratingStore)
+		ratingStore,
+	)
 
 	favoriteService := favorite.NewService(
 		favoriteStore,
@@ -81,6 +91,10 @@ func (s *APIServer) Run() error {
 	// favorite
 	favoriteHandler := favorite.NewHandler(favoriteService, userStore)
 	favoriteHandler.RegisterRouter(subrouter)
+
+	// cart
+	cartHandler := cart.NewHandler(cartService)
+	cartHandler.RegisterRoutes(subrouter, userStore)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"}, // Permitir todas as origens (evite em produção)

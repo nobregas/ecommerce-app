@@ -113,3 +113,7 @@ func getJsonTag(err validator.FieldError) string {
 	}
 	return ""
 }
+
+func ParseInt(s string) (int, error) {
+	return strconv.Atoi(s)
+}

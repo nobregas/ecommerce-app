@@ -4,18 +4,19 @@ import "time"
 
 type CartStore interface {
 	CreateCart(userID int) error
-	GetMyCartItems() (*[]Cartitem, error)
-	AddItemToCart(productID int, userID int) (*Cartitem, error)
+	GetMyCartItems(userID int) (*[]*CartItem, error)
+	AddItemToCart(productID int, userID int, price float64) (*CartItem, error)
 	RemoveItemFromCart(productID int, userID int) error
 	GetTotal(userID int) (float64, error)
+	GetCartID(userID int) (int, error)
 }
 
 type CartService interface {
 	CreateCart(userID int) error
-	GetMyCartItems() *[]Cartitem
-	AddItemToCart(productID int, userID int) *Cartitem
-	RemoveItemFromCart(productID int, userID int)
-	GetTotal(userID int) float64
+	GetMyCartItems(userID int) (*[]*CartItem, error)
+	AddItemToCart(productID int, userID int) (*CartItem, error)
+	RemoveItemFromCart(productID int, userID int) error
+	GetTotal(userID int) (float64, error)
 }
 
 type Cart struct {
@@ -25,7 +26,7 @@ type Cart struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-type Cartitem struct {
+type CartItem struct {
 	CartID        int       `json:"cartId"`
 	ProductID     int       `json:"productId"`
 	Quantity      int       `json:"quantity"`

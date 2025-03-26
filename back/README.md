@@ -20,7 +20,7 @@ todos:
 
     user profile_img (done) 
     
-    cart crud (next step)
+    cart crud (todo remove 1 from quantity)
 
     escurecer placeholder de login / register
 

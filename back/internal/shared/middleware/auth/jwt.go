@@ -197,3 +197,8 @@ func unauthorized(w http.ResponseWriter) {
 func Forbidden(w http.ResponseWriter) {
 	utils.WriteError(w, http.StatusForbidden, fmt.Errorf("actual user doesnt have access"))
 }
+
+// WithUserID add ID
+func WithUserID(ctx context.Context, userID int) context.Context {
+	return context.WithValue(ctx, userKey, userID)
+}
