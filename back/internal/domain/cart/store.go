@@ -194,7 +194,7 @@ func (s *Store) GetCartID(userID int) (int, error) {
 func (s *Store) GetCartItem(userID int, productID int) (*types.CartItem, error) {
 	cartID, err := s.GetCartID(userID)
 	if err != nil {
-		fmt.Printf("[CART STORE] getting cart ID for user %d from DB: %v", userID, err)
+		fmt.Printf("[CART STORE] ERROR getting cart ID for user %d from DB: %v", userID, err)
 		return nil, err
 	}
 
@@ -205,7 +205,7 @@ func (s *Store) GetCartItem(userID int, productID int) (*types.CartItem, error) 
 
 	item, err := scanRow(row)
 	if err != nil {
-		fmt.Printf("[CART STORE] scan item of cartid %d and productid %d: %v", cartID, productID, err)
+		fmt.Printf("[CART STORE] ERROR scan item of cartid %d and productid %d: %v", cartID, productID, err)
 		return nil, err
 	}
 	return item, nil
@@ -214,7 +214,7 @@ func (s *Store) GetCartItem(userID int, productID int) (*types.CartItem, error) 
 func (s *Store) RemoveOneItemFromCart(userID int, productID int) error {
 	cartID, err := s.GetCartID(userID)
 	if err != nil {
-		fmt.Printf("[CART STORE]: error getting cart ID at removeOneItemFromCart: %v", err)
+		fmt.Printf("[CART STORE]: ERROR getting cart ID at removeOneItemFromCart: %v", err)
 		return err
 	}
 
@@ -224,7 +224,7 @@ func (s *Store) RemoveOneItemFromCart(userID int, productID int) error {
 	`
 	_, err = s.db.Exec(query, cartID, productID)
 	if err != nil {
-		fmt.Printf("[CART STORE]: error removing one item from cart: %w", err)
+		fmt.Printf("[CART STORE]: ERROR removing one item from cart: %w", err)
 		return err
 	}
 

@@ -19,6 +19,7 @@ type CartService interface {
 	AddItemToCart(productID int, userID int) (*CartItem, error)
 	RemoveItemFromCart(productID int, userID int) error
 	GetTotal(userID int) (float64, error)
+	RemoveEntireItemFromCart(productID int, userID int) error
 }
 
 type Cart struct {

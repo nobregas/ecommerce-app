@@ -28,6 +28,7 @@ func (h *Handler) RegisterRoutes(router *mux.Router, userStore types.UserStore) 
 	authRouter.HandleFunc("/cart/items", h.getMyCartItems).Methods("GET")
 	authRouter.HandleFunc("/cart/items/{productId}", h.addItemToCart).Methods("POST")
 	authRouter.HandleFunc("/cart/items/{productId}", h.removeItemFromCart).Methods("DELETE")
+	authRouter.HandleFunc("/cart/items/{productId}/remove", h.removeEntireItemFromCart).Methods("DELETE")
 	authRouter.HandleFunc("/cart/total", h.getTotal).Methods("GET")
 }
 
@@ -91,6 +92,24 @@ func (h *Handler) removeItemFromCart(w http.ResponseWriter, r *http.Request) {
 	productID := utils.GetParamIdfromPath(r, "productId")
 
 	err := h.cartService.RemoveItemFromCart(productID, userID)
+	if err != nil {
+		utils.WriteJson(w, http.StatusInternalServerError, map[string]string{"error": "Failed to remove item from cart"})
+		return
+	}
+
+	utils.WriteJson(w, http.StatusOK, map[string]string{"message": "Item removed from cart successfully"})
+}
+
+func (h *Handler) removeEntireItemFromCart(w http.ResponseWriter, r *http.Request) {
+	userID := auth.GetUserIDFromContext(r.Context())
+	if userID == 0 {
+		utils.WriteJson(w, http.StatusUnauthorized, map[string]string{"error": "Unauthorized"})
+		return
+	}
+
+	productID := utils.GetParamIdfromPath(r, "productId")
+
+	err := h.cartService.RemoveEntireItemFromCart(productID, userID)
 	if err != nil {
 		utils.WriteJson(w, http.StatusInternalServerError, map[string]string{"error": "Failed to remove item from cart"})
 		return
