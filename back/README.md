@@ -26,6 +26,9 @@ todos:
 
     order-history 
 
+    refactor create product to when cat doesnt exist return correct error
+    refactor add product to cart when prod doesnt exist return correct error
+
     pagination
 
     search product

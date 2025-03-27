@@ -9,6 +9,8 @@ type CartStore interface {
 	RemoveItemFromCart(productID int, userID int) error
 	GetTotal(userID int) (float64, error)
 	GetCartID(userID int) (int, error)
+	GetCartItem(userID int, productID int) (*CartItem, error)
+	RemoveOneItemFromCart(userID int, productID int) error
 }
 
 type CartService interface {

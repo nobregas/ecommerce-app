@@ -91,7 +91,28 @@ func (s *Service) AddItemToCart(productID int, userID int) (*types.CartItem, err
 }
 
 func (s *Service) RemoveItemFromCart(productID int, userID int) error {
-	return s.cartStore.RemoveItemFromCart(productID, userID)
+
+	item, err := s.cartStore.GetCartItem(userID, productID)
+	if err != nil {
+		fmt.Printf("[CART SERVICE] ERROR getting item at remove item from cart %d: %v\n", productID, err)
+		return err
+	}
+
+	if item.Quantity > 1 {
+		err := s.cartStore.RemoveOneItemFromCart(userID, productID)
+		if err != nil {
+			fmt.Printf("[CART SERVICE] ERROR removing one item from cart %d: %v\n", productID, err)
+			return err
+		}
+	} else {
+		err := s.cartStore.RemoveItemFromCart(userID, productID)
+		if err != nil {
+			fmt.Printf("[CART SERVICE] ERROR removing item from cart %d: %v\n", productID, err)
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (s *Service) GetTotal(userID int) (float64, error) {

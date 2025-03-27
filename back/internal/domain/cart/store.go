@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-
 	"github.com/nobregas/ecommerce-mobile-back/internal/shared/apperrors"
 	"github.com/nobregas/ecommerce-mobile-back/internal/shared/types"
 )
@@ -190,6 +189,46 @@ func (s *Store) GetCartID(userID int) (int, error) {
 	}
 
 	return cartID, nil
+}
+
+func (s *Store) GetCartItem(userID int, productID int) (*types.CartItem, error) {
+	cartID, err := s.GetCartID(userID)
+	if err != nil {
+		fmt.Printf("[CART STORE] getting cart ID for user %d from DB: %v", userID, err)
+		return nil, err
+	}
+
+	query := `SELECT cartId, productId, quantity, priceAtAdding, addedAt
+				FROM cart_items
+				WHERE cartId = ? AND productId = ?`
+	row := s.db.QueryRow(query, cartID, productID)
+
+	item, err := scanRow(row)
+	if err != nil {
+		fmt.Printf("[CART STORE] scan item of cartid %d and productid %d: %v", cartID, productID, err)
+		return nil, err
+	}
+	return item, nil
+}
+
+func (s *Store) RemoveOneItemFromCart(userID int, productID int) error {
+	cartID, err := s.GetCartID(userID)
+	if err != nil {
+		fmt.Printf("[CART STORE]: error getting cart ID at removeOneItemFromCart: %v", err)
+		return err
+	}
+
+	query := `UPDATE cart_items 
+		SET quantity = quantity - 1 
+		WHERE cartId = ? AND productId = ? AND quantity > 1;
+	`
+	_, err = s.db.Exec(query, cartID, productID)
+	if err != nil {
+		fmt.Printf("[CART STORE]: error removing one item from cart: %w", err)
+		return err
+	}
+
+	return nil
 }
 
 func scanRow(row *sql.Row) (*types.CartItem, error) {
