@@ -3,16 +3,21 @@ package user
 import (
 	"database/sql"
 	"fmt"
+	_ "github.com/nobregas/ecommerce-mobile-back/internal/domain/cart"
 	types "github.com/nobregas/ecommerce-mobile-back/internal/shared/types"
 	"log"
 )
 
 type Store struct {
-	db *sql.DB
+	db          *sql.DB
+	cartService types.CartService
 }
 
-func NewStore(db *sql.DB) *Store {
-	return &Store{db: db}
+func NewStore(db *sql.DB, cartService types.CartService) *Store {
+	return &Store{
+		db:          db,
+		cartService: cartService,
+	}
 }
 
 func (s *Store) GetUserByEmail(email string) (*types.User, error) {
@@ -62,7 +67,7 @@ func (s *Store) CreateUser(user types.User) error {
             (fullName, email, cpf, password, role, profile_img) 
         VALUES (?, ?, ?, ?, ?, ?)`
 
-	_, err := s.db.Exec(query,
+	res, err := s.db.Exec(query,
 		user.FullName,
 		user.Email,
 		user.Cpf,
@@ -70,6 +75,16 @@ func (s *Store) CreateUser(user types.User) error {
 		user.Role,
 		user.ProfileImg,
 	)
+	if err != nil {
+		return fmt.Errorf("error creating user: %w", err)
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return fmt.Errorf("error getting user ID: %w", err)
+	}
+	err = s.cartService.CreateCart(int(id))
+
 	return err
 }
 

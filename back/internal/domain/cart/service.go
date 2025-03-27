@@ -37,7 +37,6 @@ func (s *Service) GetMyCartItems(userID int) (*[]*types.CartItem, error) {
 	return items, nil
 }
 
-// Service
 func (s *Service) AddItemToCart(productID int, userID int) (*types.CartItem, error) {
 	fmt.Printf("[CART SERVICE] Starting to add product %d to cart for user %d\n", productID, userID)
 

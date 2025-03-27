@@ -35,7 +35,6 @@ func (s *APIServer) Run() error {
 	router := mux.NewRouter()
 	subrouter := router.PathPrefix("/api/v1").Subrouter()
 
-	userStore := user.NewStore(s.db)
 	productStore := product.NewStore(s.db)
 	categoryStore := category.NewStore(s.db)
 	discountStore := discount.NewStore(s.db)
@@ -49,6 +48,8 @@ func (s *APIServer) Run() error {
 		productStore,
 		discountStore,
 	)
+
+	userStore := user.NewStore(s.db, cartService)
 
 	productService := product.NewProductService(
 		productStore,

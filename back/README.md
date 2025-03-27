@@ -4,8 +4,6 @@ todos:
     
     user-address 
 
-    when create a user also create a cart
-
     escurecer placeholder de login / register
 
     order-history 
