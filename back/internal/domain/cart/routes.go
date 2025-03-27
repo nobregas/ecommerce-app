@@ -1,6 +1,7 @@
 package cart
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -111,6 +112,7 @@ func (h *Handler) removeEntireItemFromCart(w http.ResponseWriter, r *http.Reques
 
 	err := h.cartService.RemoveEntireItemFromCart(productID, userID)
 	if err != nil {
+		fmt.Printf("[CART ROUTES] ERROR removing entire item from cart: %v\n", err)
 		utils.WriteJson(w, http.StatusInternalServerError, map[string]string{"error": "Failed to remove item from cart"})
 		return
 	}

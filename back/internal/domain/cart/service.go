@@ -116,7 +116,7 @@ func (s *Service) RemoveItemFromCart(productID int, userID int) error {
 
 func (s *Service) RemoveEntireItemFromCart(productID int, userID int) error {
 	fmt.Printf("[CART SERVICE] removing product %d from user %d\n", productID, userID)
-	return s.cartStore.RemoveItemFromCart(userID, productID)
+	return s.cartStore.RemoveItemFromCart(productID, userID)
 }
 
 func (s *Service) GetTotal(userID int) (float64, error) {

@@ -29,10 +29,20 @@ type Cart struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
+//type CartItem struct {
+//	CartID        int       `json:"cartId"`
+//	ProductID     int       `json:"productId"`
+//	Quantity      int       `json:"quantity"`
+//	PriceAtAdding float64   `json:"priceAtAdding"`
+//	AddedAt       time.Time `json:"addedAt"`
+//}
+
 type CartItem struct {
 	CartID        int       `json:"cartId"`
 	ProductID     int       `json:"productId"`
+	ProductTitle  string    `json:"productTitle"`
 	Quantity      int       `json:"quantity"`
+	ProductImage  string    `json:"productImage"`
 	PriceAtAdding float64   `json:"priceAtAdding"`
 	AddedAt       time.Time `json:"addedAt"`
 }

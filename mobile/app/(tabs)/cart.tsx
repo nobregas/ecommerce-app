@@ -1,92 +1,64 @@
-import { FlatList, StyleSheet, Text, Touchable, TouchableOpacity, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { CartItemType } from '@/types/type'
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import React from 'react'
 import { useHeaderHeight } from '@react-navigation/elements'
 import { Link, Stack } from 'expo-router'
 import CartItem from '@/components/CartItem'
 import { Colors } from '@/constants/Colors'
 import Animated, { FadeInDown, SlideInDown } from 'react-native-reanimated'
-import { getCartItems, removeFromCart, updateQuantity } from '@/service/ApiService'
-import { getTotal } from '@/utils/sharedFunctions'
+import { useCartStore } from '@/store/cardBadgeStore'
 
 type Props = {}
 
-const CartScreen = (props: Props) => {
-
+const CartScreen = () => {
   const headerHeight = useHeaderHeight()
-  const [cartItems, setCartItems] = useState<CartItemType[]>([])
+  const { cartItems, fetchCartItems, total } = useCartStore()
 
-  useEffect(() => {
+  React.useEffect(() => {
     fetchCartItems()
-    const interval = setInterval(fetchCartItems, 5000)
-
-    return () => clearInterval(interval)
   }, [])
-
-  const fetchCartItems = async () => {
-    try {
-      const cartItemsData = await getCartItems()
-
-      setCartItems(cartItemsData)
-
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
-  const handleUpdateQuantity = async (id: number, newQuantity: number) => {
-    const updatedItem = await updateQuantity(id, newQuantity)
-
-    // Update the quantity of an especific cart item
-    setCartItems(prevItems => {
-      return prevItems.map(item => {
-        if (item.id === id) {
-          return { ...item, quantity: newQuantity }
-        }
-        return item
-      })
-    })
-  }
-
-  const handleRemoveItem = async (id: number) => {
-    const removedItemId = await removeFromCart(id)
-
-    // Remove the cart item
-    setCartItems(prevItems => {
-      return prevItems.filter(item => item.id !== id)
-    })
-  }
 
   return (
     <>
       <Stack.Screen
-        options={{ headerShown: true, headerTransparent: true, headerTitleAlign: 'center', title: 'cart' }}
+        options={{ 
+          headerShown: true, 
+          headerTransparent: true, 
+          headerTitleAlign: 'center', 
+          title: 'Cart',
+          headerRight: () => (
+            <Link href="/cart" asChild>
+              <TouchableOpacity style={{ marginRight: 20 }}>
+                <Text style={{ color: Colors.primary, fontWeight: '500' }}>Total: R${total.toFixed(2)}</Text>
+              </TouchableOpacity>
+            </Link>
+          )
+        }}
       />
       <View style={[styles.container, { marginTop: headerHeight }]}>
         <FlatList
           data={cartItems}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.productId.toString()}
           renderItem={({ item, index }) => (
             <Animated.View entering={FadeInDown.delay(300 + index * 100).duration(500)}>
-              <CartItem
-                item={item}
-                updateQuantity={handleUpdateQuantity}
-                removeItem={handleRemoveItem}
-              />
+              <CartItem item={item} />
             </Animated.View>
           )}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>Your cart is empty</Text>
+            </View>
+          }
         />
       </View>
-      <Animated.View style={styles.footer} entering={SlideInDown.delay(500).duration(500)}>
-        <View style={styles.priceInfoWrapper}>
-          <Text style={styles.totalTxt}>Total: R${getTotal(cartItems)}</Text>
-        </View>
-        <Link href="/checkout/index" asChild>
-          <TouchableOpacity style={styles.checkoutBtn}>
-            <Text style={styles.checkoutBtnTxt}>Checkout</Text>
-          </TouchableOpacity>
-        </Link>
-      </Animated.View>
+      {cartItems.length > 0 && (
+        <Animated.View style={styles.footer} entering={SlideInDown.delay(500).duration(500)}>
+          <Link href="/checkout/index" asChild>
+            <TouchableOpacity style={styles.checkoutBtn}>
+              <Text style={styles.checkoutBtnTxt}>Checkout R${total.toFixed(2)}</Text>
+            </TouchableOpacity>
+          </Link>
+        </Animated.View>
+      )}
     </>
   )
 }
@@ -124,5 +96,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: Colors.white
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 100
+  },
+  emptyText: {
+    fontSize: 18,
+    color: Colors.gray,
+    fontWeight: '500'
   }
 })

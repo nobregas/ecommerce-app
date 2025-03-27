@@ -1,0 +1,2 @@
+ALTER TABLE cart_items
+ADD COLUMN productImage VARCHAR(255) NULL AFTER addedAt;

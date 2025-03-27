@@ -1,69 +1,93 @@
 
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import React from 'react'
-import { CartItemType } from '@/types/type'
 import { Colors } from '@/constants/Colors'
 import { Ionicons } from '@expo/vector-icons'
 import { Image } from "expo-image"
 import { Link } from 'expo-router'
 import { useCartStore } from '@/store/cardBadgeStore'
-
+import { CartItemType } from '@/service/cartService'
 
 type Props = {
     item: CartItemType
-    updateQuantity: (id: number, newQuantity: number) => void
-    removeItem: (id: number) => void
 }
 
-
-const CartItem = ({ item, updateQuantity, removeItem }: Props) => {
-    const { fetchCartCount } = useCartStore();
-
+const CartItem = ({ item }: Props) => {
+    const { addToCart, removeOneFromCart, removeItemFromCart } = useCartStore();
+    
     const handleIncrement = async () => {
-        await updateQuantity(item.id, item.quantity + 1)
+        try {
+            await addToCart(item.productId);
+        } catch (error) {
+            alert("Error incrementing item");
+        }
     }
 
     const handleDecrement = async () => {
-        if (item.quantity > 1) {
-            await updateQuantity(item.id, item.quantity - 1)
+        try {
+            await removeOneFromCart(item.productId);
+        } catch (error) {
+            alert("Error decrementing item");
         }
     }
 
     const handleRemoveItem = async () => {
-        await removeItem(item.id)
-        fetchCartCount()
+        try {
+            await removeItemFromCart(item.productId);
+        } catch (error) {
+            alert("Error removing item");
+        }
     }
+
 
     return (
         <Link href={{
             pathname: "/product-details/[id]",
-            params: { id: item.id, productType: item.productType }
+            params: { id: item.productId }
         }} asChild>
             <TouchableOpacity>
-            <View style={styles.container}>
-                <Image source={{ uri: item.image }} style={styles.itemImg} />
-                <View style={styles.itemInfoWrapper}>
-                    <Text style={styles.itemTxt}>{item.title}</Text>
-                    <Text style={styles.itemTxt}>R${item.price}</Text>
-                    <View style={styles.itemControlWrapper}>
-                        <TouchableOpacity onPress={handleRemoveItem}>
-                            <Ionicons name="trash-outline" size={20} color={Colors.red} />
-                        </TouchableOpacity>
-                        <View style={styles.quantityControlWrapper}>
-                            <TouchableOpacity style={styles.quantityControl} onPress={handleDecrement}>
-                                <Ionicons name="remove-outline" size={20} color={Colors.black} />
+                <View style={styles.container}>
+                    <Image 
+                        source={{ uri: item.productImage }} 
+                        style={styles.itemImg} 
+                        contentFit="cover"
+                    />
+                    <View style={styles.itemInfoWrapper}>
+                        <Text style={styles.itemTxt} numberOfLines={1}>{item.productTitle}</Text>
+                        <Text style={styles.itemTxt}>R${item.priceAtAdding.toFixed(2)}</Text>
+                        <View style={styles.itemControlWrapper}>
+                            <TouchableOpacity 
+                                onPress={(e) => {
+                                    e.preventDefault();
+                                    handleRemoveItem();
+                                }}
+                            >
+                                <Ionicons name="trash-outline" size={20} color={Colors.red} />
                             </TouchableOpacity>
-                            <Text style={styles.quantity}>{item.quantity}</Text>
-                            <TouchableOpacity style={styles.quantityControl} onPress={handleIncrement}>
-                                <Ionicons name="add-outline" size={20} color={Colors.black} />
-                            </TouchableOpacity>
+                            <View style={styles.quantityControlWrapper}>
+                                <TouchableOpacity 
+                                    style={styles.quantityControl} 
+                                    onPress={(e) => {
+                                        e.preventDefault();
+                                        handleDecrement();
+                                    }}
+                                >
+                                    <Ionicons name="remove-outline" size={20} color={Colors.black} />
+                                </TouchableOpacity>
+                                <Text style={styles.quantity}>{item.quantity}</Text>
+                                <TouchableOpacity 
+                                    style={styles.quantityControl} 
+                                    onPress={(e) => {
+                                        e.preventDefault();
+                                        handleIncrement();
+                                    }}
+                                >
+                                    <Ionicons name="add-outline" size={20} color={Colors.black} />
+                                </TouchableOpacity>
+                            </View>
                         </View>
-                        <TouchableOpacity>
-                            <Ionicons name="heart-outline" size={20} color={Colors.black} />
-                        </TouchableOpacity>
                     </View>
                 </View>
-            </View>
             </TouchableOpacity>
         </Link>
     )

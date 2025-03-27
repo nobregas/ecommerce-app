@@ -22,7 +22,7 @@ export default function ProductDetails() {
 
   const [product, setProduct] = useState<ProductDetailsType | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
-  const { fetchCartCount } = useCartStore();
+  const { addToCart  } = useCartStore();
 
   useEffect(() => {
     fetchProductDetails()
@@ -41,11 +41,13 @@ export default function ProductDetails() {
 
   const handleAddToCart = async () => {
     try {
-      //const response = await addToCart(product!, productTypeStr as ProductStrType);
-      fetchCartCount()
-      //alert(response);
+      if (!product) return;
+      
+      await addToCart(product.id);
+      alert("Product added to the cart!");
     } catch (error) {
-      alert("Error adding to cart");
+      console.log(error)
+      alert("Error adding product to the cart ");
     }
   }
 

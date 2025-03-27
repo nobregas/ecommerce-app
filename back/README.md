@@ -4,8 +4,6 @@ todos:
     
     user-address 
 
-    escurecer placeholder de login / register
-
     order-history 
 
     refactor create product to when cat doesnt exist return correct error
