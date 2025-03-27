@@ -10,6 +10,7 @@ const inputField = ({ error, ...props }: InputFieldProps) => {
         <>
             <TextInput
                 {...props}
+                placeholderTextColor={Colors.gray}
                 style={[styles.inputField, error && styles.errorInput]}
             />
             {error && <Text style={styles.errorText}>{error}</Text>}
