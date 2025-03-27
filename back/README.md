@@ -1,26 +1,10 @@
 todos:
-    
-    custom errors (done)
-    
+     
     service layer
-
-    product_discounts (done)
-   
-    product_ratings (done)
-    
-    user_favorite products (done)
-    
-    specific product types for front (done)
-
-    notifications crud (done)
     
     user-address 
 
-    when create a user also create a cart    
-
-    user profile_img (done) 
-    
-    cart crud (done)
+    when create a user also create a cart
 
     escurecer placeholder de login / register
 
@@ -29,8 +13,6 @@ todos:
     refactor create product to when cat doesnt exist return correct error
 
     refactor add product only if has stock
-
-    add remove entire item at cart
 
     refactor add product to cart when prod doesnt exist return correct error
 
