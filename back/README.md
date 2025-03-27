@@ -28,6 +28,10 @@ todos:
 
     refactor create product to when cat doesnt exist return correct error
 
+    refactor add product only if has stock
+
+    add remove entire item at cart
+
     refactor add product to cart when prod doesnt exist return correct error
 
     pagination
