@@ -20,16 +20,19 @@ todos:
 
     user profile_img (done) 
     
-    cart crud (todo remove 1 from quantity)
+    cart crud (done)
 
     escurecer placeholder de login / register
 
     order-history 
 
     refactor create product to when cat doesnt exist return correct error
+
     refactor add product to cart when prod doesnt exist return correct error
 
     pagination
+    
+    firebase image upload
 
     search product
 
