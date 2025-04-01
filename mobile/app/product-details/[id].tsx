@@ -7,10 +7,9 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import Animated, { FadeInDown, SlideInDown } from "react-native-reanimated";
-import { addToCart, getProductDetails } from "@/service/ApiService";
 import { useCartStore } from "@/store/cardBadgeStore";
 import React from "react";
-import productService, {ProductDetailsType} from "@/service/productService";
+import productService, { ProductDetailsType } from "@/service/productService";
 import HeartButton from "@/components/HeartButton";
 
 export default function ProductDetails() {
@@ -22,7 +21,7 @@ export default function ProductDetails() {
 
   const [product, setProduct] = useState<ProductDetailsType | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
-  const { addToCart  } = useCartStore();
+  const { addToCart } = useCartStore();
 
   useEffect(() => {
     fetchProductDetails()
@@ -42,7 +41,7 @@ export default function ProductDetails() {
   const handleAddToCart = async () => {
     try {
       if (!product) return;
-      
+
       await addToCart(product.id);
       alert("Product added to the cart!");
     } catch (error) {
@@ -128,8 +127,15 @@ export default function ProductDetails() {
 
             <Animated.View style={styles.priceWrapper} entering={FadeInDown.delay(900).duration(500)}>
               <Text style={styles.priceTxt}>R${product.price.toFixed(2)}</Text>
-              <View style={styles.discountWrapper}><Text style={styles.discount}>{product.discountPercentage}%</Text></View>
-              <Text style={styles.oldPrice}>R${product.basePrice}</Text>
+              {product.discountPercentage > 0 && (
+                <>
+                  <View style={styles.discountWrapper}>
+                    <Text style={styles.discount}>{product.discountPercentage}%
+                    </Text>
+                  </View>
+                  <Text style={styles.oldPrice}>R${product.basePrice}</Text>
+                </>
+              )}
             </Animated.View>
 
             <Animated.Text
@@ -138,46 +144,6 @@ export default function ProductDetails() {
             >
               {product.description}
             </Animated.Text>
-
-            <Animated.View style={styles.productVariationWrapper} entering={FadeInDown.delay(1300).duration(500)}>
-              <View style={styles.productVariationType}>
-                <Text style={styles.productVariationTitle}>Color</Text>
-                <View style={styles.productVariationValueWrapper}>
-                  <View style={{ borderColor: Colors.primary, borderWidth: 1, borderRadius: 100, padding: 2 }}>
-                    <View style={[styles.productVariationColorValue, { backgroundColor: Colors.yellow }]} />
-                  </View>
-                  <View style={[styles.productVariationColorValue, { backgroundColor: Colors.black }]} />
-                  <View style={[styles.productVariationColorValue, { backgroundColor: Colors.primary }]} />
-                  <View style={[styles.productVariationColorValue, { backgroundColor: Colors.highlight }]} />
-                  <View style={[styles.productVariationColorValue, { backgroundColor: "#333" }]} />
-                  <View style={[styles.productVariationColorValue, { backgroundColor: "#A12345" }]} />
-
-                </View>
-              </View>
-              <View style={styles.productVariationType}>
-                <Text style={styles.productVariationTitle}>Size</Text>
-                <View style={styles.productVariationValueWrapper}>
-                  <View style={[styles.productVariationSizeValue, { borderColor: Colors.primary }]}>
-                    <Text
-                      style={[
-                        styles.productVariationSizeValueTxt,
-                        { color: Colors.primary, fontWeight: "bold" }
-                      ]}
-                    >S
-                    </Text>
-                  </View>
-                  <View style={styles.productVariationSizeValue}>
-                    <Text style={styles.productVariationSizeValueTxt}>M</Text>
-                  </View>
-                  <View style={styles.productVariationSizeValue}>
-                    <Text style={styles.productVariationSizeValueTxt}>L</Text>
-                  </View>
-                  <View style={styles.productVariationSizeValue}>
-                    <Text style={styles.productVariationSizeValueTxt}>XL</Text>
-                  </View>
-                </View>
-              </View>
-            </Animated.View>
           </View>
         )}
 

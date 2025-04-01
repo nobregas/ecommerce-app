@@ -9,8 +9,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
-    "lint": "expo lint",
-    "dev": "cd data && json-server --host 0.0.0.0 --port 8080 --watch db.json"
+    "lint": "expo lint"
   },
   "jest": {
     "preset": "jest-expo"

@@ -6,7 +6,6 @@ import ProductList from '@/components/ProductList';
 import { CategoryType, ProductType } from '@/types/type';
 import Categories from '@/components/Categories';
 import FlashSale from '@/components/FlashSale';
-import { getCategories, getSaleProducts, getProducts } from '@/service/ApiService';
 import { Image } from "expo-image"
 import productService, { SimpleProductObject } from '@/service/productService';
 import categoryService, { Category } from '@/service/categoryService';

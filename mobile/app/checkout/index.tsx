@@ -5,7 +5,6 @@ import { Colors } from '@/constants/Colors'
 import { Stack, useNavigation } from 'expo-router'
 import { useHeaderHeight } from '@react-navigation/elements'
 import { CartItemType } from '@/types/type'
-import { clearCart, getCartItems } from '@/service/ApiService'
 import { Image } from 'expo-image'
 import Animated, { SlideInDown } from 'react-native-reanimated'
 
@@ -22,19 +21,13 @@ const CheckoutScreen = (props: Props) => {
     }, [])
 
     const fetchCartItems = async () => {
-        try {
-            const cartItemsData = await getCartItems()
-            setCartItems(cartItemsData)
-        } catch (error) {
-            console.log(error)
-        }
+        
     }
 
 
     const handlePlaceOrder = async () => {
         try {
-
-            await clearCart()
+            // clear the cart after placing the order
 
             // logic to place the order
             Alert.alert("Order Placed", "Your order has been successfully placed.");
@@ -85,7 +78,7 @@ const CheckoutScreen = (props: Props) => {
             </ScrollView>
             <Animated.View style={styles.footer} entering={SlideInDown.duration(500)}>
                 <View style={styles.priceInfoWrapper}>
-                    <Text style={styles.totalTxt}>Total: ${getTotal(cartItems)}</Text>
+                    <Text style={styles.totalTxt}>Total: R${getTotal(cartItems)}</Text>
                 </View>
                 <TouchableOpacity
                     style={styles.checkoutBtn}

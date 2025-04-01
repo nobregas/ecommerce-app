@@ -52,7 +52,7 @@ const CartScreen = () => {
       </View>
       {cartItems.length > 0 && (
         <Animated.View style={styles.footer} entering={SlideInDown.delay(500).duration(500)}>
-          <Link href="/checkout/index" asChild>
+          <Link href="/checkout" asChild>
             <TouchableOpacity style={styles.checkoutBtn}>
               <Text style={styles.checkoutBtnTxt}>Checkout R${total.toFixed(2)}</Text>
             </TouchableOpacity>
