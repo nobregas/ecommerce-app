@@ -115,12 +115,14 @@ const SignUpScreen = (props: Props) => {
           placeholder='Password'
           value={password.value}
           onChangeText={(text) => setPassword({ value: text, dirty: true })}
+          secureTextEntry={true}
           error={password.dirty && password.value.length < 3 ? 'Password must be at least 3 characters' : ''}
         />
         <InputField
           placeholder='Confirm Password'
           value={confirmPassword.value}
           onChangeText={(text) => setConfirmPassword({ value: text, dirty: true })}
+          secureTextEntry={true}
           error={confirmPassword.dirty && password.value !== confirmPassword.value ? 'Passwords do not match' : ''}
         />
 

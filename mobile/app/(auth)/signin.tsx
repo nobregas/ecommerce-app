@@ -69,6 +69,7 @@ const SignInScreen = (props: Props) => {
           placeholder='Password'
           value={password.value}
           onChangeText={(text) => setPassword({ value: text, dirty: true })}
+          secureTextEntry={true}
           error={password.dirty && !password.value ? 'Password is required' : ''}
         />
 
