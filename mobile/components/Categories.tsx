@@ -23,11 +23,23 @@ const Categories = ({ categories }: Props) => {
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 keyExtractor={(item) => item.id.toString()}
+                contentContainerStyle={{ paddingHorizontal: 20 }}
                 renderItem={({ item, index }) => (
                     <TouchableOpacity>
                         <View style={styles.item}>
                             <Image source={{ uri: item.imageUrl }} style={styles.itemImg} />
-                            <Text>{item.name}</Text>
+                            <Text
+                                numberOfLines={2}
+                                ellipsizeMode='tail'
+                                style={{
+                                    textAlign: "center",
+                                    fontSize: 12,
+                                    lineHeight: 16,
+                                    paddingHorizontal: 2,
+                                }}
+                            >
+                                {item.name}
+                            </Text>
                         </View>
                     </TouchableOpacity>
                 )}
@@ -41,11 +53,13 @@ export default Categories
 const styles = StyleSheet.create({
     container: {
         marginBottom: 20,
+        marginTop: 10,
     },
     titleWrapper: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginHorizontal: 20
+        marginHorizontal: 20,
+        marginBottom: 10,
     },
     title: {
         fontSize: 18,
@@ -63,11 +77,13 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         gap: 5,
         alignItems: "center",
-        marginLeft: 20
+        marginRight: 15,
+        minWidth: 100,
+        maxWidth: 120,
     },
     itemImg: {
-        width: 50,
-        height: 50,
+        width: 60,
+        height: 60,
         borderRadius: 30,
         backgroundColor: Colors.lightGray
     }
