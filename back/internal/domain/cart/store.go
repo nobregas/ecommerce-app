@@ -255,6 +255,20 @@ func (s *Store) RemoveOneItemFromCart(userID int, productID int) error {
 	return nil
 }
 
+func (s *Store) RemoveItemsFromCart(userID int) error {
+	cartID, err := s.GetCartID(userID)
+	if err != nil {
+		return fmt.Errorf("error getting cart ID: %w", err)
+	}
+
+	_, err = s.db.Exec(`DELETE FROM cart_items WHERE cartId = ?`, cartID)
+	if err != nil {
+		return fmt.Errorf("error deleting cart items: %w", err)
+	}
+
+	return nil
+}
+
 func scanRow(row *sql.Row) (*types.CartItem, error) {
 	c := new(types.CartItem)
 	err := row.Scan(

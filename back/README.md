@@ -6,8 +6,6 @@ todos:
 
     order-history 
 
-    remove all items from cart
-
     ai recommendation: {
         will use order history if not will use cart items
         will return a list of products related with cart items or user order history

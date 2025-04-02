@@ -126,3 +126,8 @@ func (s *Service) GetTotal(userID int) (float64, error) {
 	}
 	return total, nil
 }
+
+func (s *Service) RemoveItemsFromCart(userID int) error {
+	fmt.Printf("[CART SERVICE] Removing all items from cart for user %d\n", userID)
+	return s.cartStore.RemoveItemsFromCart(userID)
+}

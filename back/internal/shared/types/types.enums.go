@@ -44,7 +44,6 @@ func (r *UserRole) Scan(value interface{}) error {
 	return r.Valid()
 }
 
-// OrderStatus
 type OrderStatus string
 
 const (
@@ -63,7 +62,6 @@ func (s OrderStatus) Valid() error {
 	}
 }
 
-// PaymentMethod
 type PaymentMethod string
 
 const (

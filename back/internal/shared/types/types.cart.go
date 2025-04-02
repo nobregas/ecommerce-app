@@ -11,6 +11,7 @@ type CartStore interface {
 	GetCartID(userID int) (int, error)
 	GetCartItem(userID int, productID int) (*CartItem, error)
 	RemoveOneItemFromCart(userID int, productID int) error
+	RemoveItemsFromCart(userID int) error
 }
 
 type CartService interface {
@@ -20,6 +21,7 @@ type CartService interface {
 	RemoveItemFromCart(productID int, userID int) error
 	GetTotal(userID int) (float64, error)
 	RemoveEntireItemFromCart(productID int, userID int) error
+	RemoveItemsFromCart(userID int) error
 }
 
 type Cart struct {
@@ -28,14 +30,6 @@ type Cart struct {
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
-
-//type CartItem struct {
-//	CartID        int       `json:"cartId"`
-//	ProductID     int       `json:"productId"`
-//	Quantity      int       `json:"quantity"`
-//	PriceAtAdding float64   `json:"priceAtAdding"`
-//	AddedAt       time.Time `json:"addedAt"`
-//}
 
 type CartItem struct {
 	CartID        int       `json:"cartId"`
