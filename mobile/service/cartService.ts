@@ -67,6 +67,14 @@ class CartService {
         }
     }
 
+    async clearCart() {
+        try {
+            await api.delete(`/cart/clear`);
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
+
     private handleError(error: any): Error {
         console.log("Error", error);
         const defaultMessage = "Failed to fetch cart";
