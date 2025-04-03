@@ -7,14 +7,22 @@ import { useHeaderHeight } from '@react-navigation/elements'
 import { CartItemType } from '@/types/type'
 import { Image } from 'expo-image'
 import Animated, { SlideInDown } from 'react-native-reanimated'
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
+import Ionicons from 'react-native-vector-icons/Ionicons'
 
-type Props = {}
+enum PaymentMethod {
+    CREDIT_CARD = 'CREDIT_CARD',
+    DEBIT_CARD = 'DEBIT_CARD',
+    PIX = 'PIX'
+}
 
-const CheckoutScreen = (props: Props) => {
+const CheckoutScreen = () => {
     const navigation = useNavigation()
-
     const headerHeight = useHeaderHeight()
     const [cartItems, setCartItems] = useState<CartItemType[]>([])
+    const [selectedPayment, setSelectedPayment] = useState<PaymentMethod | null>(null)
+
+
 
     useEffect(() => {
         fetchCartItems()
@@ -27,6 +35,11 @@ const CheckoutScreen = (props: Props) => {
 
     const handlePlaceOrder = async () => {
         try {
+            if (!selectedPayment) {
+                Alert.alert("Error", "Please select a payment method.")
+                return
+            }
+
             // clear the cart after placing the order
 
             // logic to place the order
@@ -36,6 +49,28 @@ const CheckoutScreen = (props: Props) => {
 
         } catch (error) {
             Alert.alert("Error", "Failed to place order. Please try again.");
+        }
+    }
+
+    const getPaymentIcon = (method: PaymentMethod) => {
+        switch (method) {
+            case PaymentMethod.CREDIT_CARD:
+                return 'credit-card'
+            case PaymentMethod.DEBIT_CARD:
+                return 'bank-transfer'
+            case PaymentMethod.PIX:
+                return 'qrcode-scan'
+        }
+    }
+
+    const getPaymentLabel = (method: PaymentMethod) => {
+        switch (method) {
+            case PaymentMethod.CREDIT_CARD:
+                return 'Credit Card'
+            case PaymentMethod.DEBIT_CARD:
+                return 'Debit Card'
+            case PaymentMethod.PIX:
+                return 'PIX'
         }
     }
 
@@ -67,12 +102,36 @@ const CheckoutScreen = (props: Props) => {
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Payment Information</Text>
-                    <View style={styles.paymentNote}>
-                        <Text style={styles.noteText}>
-                            Please note: Payment will be completed at the market counter when you collect your order.
+                    <Text style={styles.sectionTitle}>Payment Method</Text>
+                    
+                    {Object.values(PaymentMethod).map((method) => (
+                        <TouchableOpacity
+                        key={method}
+                        style={[
+                            styles.paymentOption,
+                            selectedPayment === method && styles.selectedOption
+                        ]}
+                        onPress={() => setSelectedPayment(method)} // Corrigindo a seleção
+                    >
+                        <Icon
+                            name={getPaymentIcon(method)}
+                            size={24}
+                            color={selectedPayment === method ? Colors.primary : Colors.darkGray}
+                        />
+                        <Text style={styles.paymentText}>
+                            {getPaymentLabel(method)}
                         </Text>
-                    </View>
+                        {selectedPayment === method && (
+                            <Ionicons
+                                name="checkmark-circle"
+                                size={24}
+                                color={Colors.primary}
+                                style={styles.checkmark}
+                            />
+                        )}
+                    </TouchableOpacity>
+                    ))}
+                
                 </View>
 
             </ScrollView>
@@ -213,6 +272,30 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '500',
         color: Colors.white
+    },
+    paymentOption: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 15,
+        marginVertical: 5,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: Colors.lightGray,
+        backgroundColor: Colors.white,
+    },
+    selectedOption: {
+        borderColor: Colors.primary,
+        backgroundColor: Colors.transparentPrimary,
+        borderWidth: 2,
+    },
+    paymentText: {
+        fontSize: 16,
+        color: Colors.darkGray,
+        marginLeft: 15,
+        flex: 1,
+    },
+    checkmark: {
+        marginLeft: 10,
     },
 });
 

@@ -1,13 +1,12 @@
 import { Colors } from "@/constants/Colors";
-import { ProductStrType, ProductType } from "@/types/type";
+import { ProductStrType } from "@/types/type";
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { Image } from "expo-image"
-import React, { useEffect } from "react";
-import productService, { SimpleProductObject } from "@/service/productService";
-import HeartButton from "./HeartButton";
+import React from "react";
+import { SimpleProductObject } from "@/service/productService";
 
 type Props = {
     item: SimpleProductObject;
@@ -18,11 +17,7 @@ type Props = {
 const width = Dimensions.get("window").width - 40;
 
 export default function ProductItem({ item, index, productType }: Props) {
-    const [isFavorited, setIsFavorited] = React.useState(item.isFavorite);
-
-    useEffect(() => {
-        setIsFavorited(item.isFavorite)
-    }, [isFavorited])
+    
 
     return (
         <Link href={{
@@ -35,12 +30,6 @@ export default function ProductItem({ item, index, productType }: Props) {
                         source={{ uri: item.image }}
                         style={styles.productImage}
                         placeholder={"https://via.placeholder.com/150"}
-                    />
-                    <HeartButton
-                        productId={item.id}
-                        initialIsFavorited={item.isFavorite}
-                        size={20}
-                        style={styles.bookmarkBtn}
                     />
                     <View style={styles.productInfo}>
                         <Text style={styles.price}>R${item.price}</Text>

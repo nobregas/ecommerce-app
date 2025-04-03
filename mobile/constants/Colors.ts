@@ -1,5 +1,6 @@
 export const Colors = {
   primary: '#572fff',
+  transparentPrimary: 'rgba(87, 47, 255, 0.1)',
   secondary: "#673ab7",
   darkGray: '#222',
   black: '#333',
