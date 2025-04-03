@@ -10,6 +10,7 @@ import (
 	"github.com/nobregas/ecommerce-mobile-back/internal/domain/discount"
 	"github.com/nobregas/ecommerce-mobile-back/internal/domain/favorite"
 	"github.com/nobregas/ecommerce-mobile-back/internal/domain/notification"
+	"github.com/nobregas/ecommerce-mobile-back/internal/domain/orders"
 	product "github.com/nobregas/ecommerce-mobile-back/internal/domain/product"
 	"github.com/nobregas/ecommerce-mobile-back/internal/domain/rating"
 	user "github.com/nobregas/ecommerce-mobile-back/internal/domain/user"
@@ -42,6 +43,7 @@ func (s *APIServer) Run() error {
 	notificationStore := notification.NewStore(s.db)
 	favoriteStore := favorite.NewStore(s.db)
 	cartStore := cart.NewStore(s.db)
+	orderStore := orders.NewStore(s.db)
 
 	cartService := cart.NewService(
 		cartStore,
@@ -49,6 +51,11 @@ func (s *APIServer) Run() error {
 		discountStore,
 	)
 
+	orderService := orders.NewService(
+		orderStore,
+		cartStore,
+		productStore,
+	)
 	userStore := user.NewStore(s.db, cartService)
 
 	productService := product.NewProductService(
@@ -97,8 +104,12 @@ func (s *APIServer) Run() error {
 	cartHandler := cart.NewHandler(cartService)
 	cartHandler.RegisterRoutes(subrouter, userStore)
 
+	// order
+	orderHandler := orders.NewHandler(orderService)
+	orderHandler.RegisterRoutes(subrouter, userStore)
+
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"}, // Permitir todas as origens (evite em produção)
+		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 		AllowCredentials: true,
