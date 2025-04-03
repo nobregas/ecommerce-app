@@ -1,8 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Tabs } from "expo-router";
 import TabBar from '@/components/TabBar';
+import { useCartStore } from '@/store/cardBadgeStore';
 
 export default function TabLayout() {
+  const { fetchCartItems } = useCartStore();
+
+  useEffect(() => {
+    fetchCartItems();
+  }, []);
+
   return (
     <Tabs tabBar={props => <TabBar {...props} />} screenOptions={{headerShown: false}}>
       <Tabs.Screen 

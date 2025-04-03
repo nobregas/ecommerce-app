@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import React from 'react';
 import { UserProvider } from '../context/UserContext';
-
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -26,12 +26,15 @@ export default function RootLayout() {
   }
 
   return (
-    <UserProvider>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)/signin" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="(auth)/signup" options={{ presentation: 'modal' }} />
-      </Stack>
-    </UserProvider>
+    <SafeAreaProvider>
+      <UserProvider>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)/signin" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="(auth)/signup" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="support/chat" />
+        </Stack>
+      </UserProvider>
+    </SafeAreaProvider>
   );
 }

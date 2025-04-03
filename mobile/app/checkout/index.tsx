@@ -1,37 +1,38 @@
-import { View, Text, Alert, ScrollView, StyleSheet, TouchableOpacity } from 'react-native'
+import { View, Text, Alert, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { getTotal } from '@/utils/sharedFunctions'
 import { Colors } from '@/constants/Colors'
-import { Stack, useNavigation } from 'expo-router'
+import { Stack, useNavigation, useRouter } from 'expo-router'
 import { useHeaderHeight } from '@react-navigation/elements'
 import { CartItemType } from '@/types/type'
 import { Image } from 'expo-image'
 import Animated, { SlideInDown } from 'react-native-reanimated'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import Ionicons from 'react-native-vector-icons/Ionicons'
-
-enum PaymentMethod {
-    CREDIT_CARD = 'CREDIT_CARD',
-    DEBIT_CARD = 'DEBIT_CARD',
-    PIX = 'PIX'
-}
+import { useCartStore } from '@/store/cardBadgeStore'
+import { useOrderStore } from '@/store/orderStore'
+import { PaymentMethod } from '@/service/orderService'
+import cartService from '@/service/cartService'
 
 const CheckoutScreen = () => {
     const navigation = useNavigation()
+    const router = useRouter()
     const headerHeight = useHeaderHeight()
-    const [cartItems, setCartItems] = useState<CartItemType[]>([])
+    const { cartItems, fetchCartItems, total } = useCartStore()
+    const { createOrder, isLoading, error, clearError } = useOrderStore()
     const [selectedPayment, setSelectedPayment] = useState<PaymentMethod | null>(null)
-
-
 
     useEffect(() => {
         fetchCartItems()
     }, [])
 
-    const fetchCartItems = async () => {
-        
-    }
-
+    useEffect(() => {
+        if (error) {
+            Alert.alert("Error", error, [
+                { text: "OK", onPress: clearError }
+            ]);
+        }
+    }, [error])
 
     const handlePlaceOrder = async () => {
         try {
@@ -40,15 +41,37 @@ const CheckoutScreen = () => {
                 return
             }
 
-            // clear the cart after placing the order
+            const payload = {
+                paymentMethod: selectedPayment,
+                paymentId: selectedPayment === PaymentMethod.PIX ? 'pix-' + Date.now() : undefined
+            }
 
-            // logic to place the order
-            Alert.alert("Order Placed", "Your order has been successfully placed.");
-
-            navigation.goBack()
-
+            const order = await createOrder(payload)
+            
+            // Clear the cart after order is placed successfully
+            await cartService.clearCart()
+            // Refresh cart
+            fetchCartItems()
+            
+            Alert.alert(
+                "Order Placed", 
+                "Your order has been successfully placed! Order #" + order.id,
+                [
+                    { 
+                        text: "View Details", 
+                        onPress: () => router.push(
+                            "/orders/index"
+                        )
+                    },
+                    { 
+                        text: "Continue Shopping", 
+                        onPress: () => router.push("/(tabs)") 
+                    }
+                ]
+            )
         } catch (error) {
-            Alert.alert("Error", "Failed to place order. Please try again.");
+            console.error("Error creating order:", error)
+            Alert.alert("Error", "Failed to place order. Please try again.")
         }
     }
 
@@ -74,10 +97,29 @@ const CheckoutScreen = () => {
         }
     }
 
+    if (cartItems.length === 0) {
+        return (
+            <>
+                <Stack.Screen
+                    options={{ headerShown: true, headerTransparent: true, headerTitleAlign: 'center', title: 'Checkout' }}
+                />
+                <View style={[styles.emptyContainer, { marginTop: headerHeight }]}>
+                    <Text style={styles.emptyText}>Your cart is empty</Text>
+                    <TouchableOpacity 
+                        style={styles.continueShoppingBtn}
+                        onPress={() => router.push("/(tabs)")}
+                    >
+                        <Text style={styles.continueShoppingBtnTxt}>Continue Shopping</Text>
+                    </TouchableOpacity>
+                </View>
+            </>
+        )
+    }
+
     return (
         <>
             <Stack.Screen
-                options={{ headerShown: true, headerTransparent: true, headerTitleAlign: 'center', title: 'checkout' }}
+                options={{ headerShown: true, headerTransparent: true, headerTitleAlign: 'center', title: 'Checkout' }}
             />
             <ScrollView
                 style={[styles.container, { marginTop: headerHeight }]}
@@ -88,13 +130,14 @@ const CheckoutScreen = () => {
                     {cartItems.map((item, index) => (
                         <View key={index} style={styles.itemContainer}>
                             <Image
-                                source={{ uri: item.image }}
+                                source={{ uri: item.productImage }}
                                 style={styles.itemImage}
+                                contentFit="cover"
                             />
                             <View style={styles.itemInfoWrapper}>
-                                <Text style={styles.itemName}>{item.title}</Text>
+                                <Text style={styles.itemName}>{item.productTitle}</Text>
                                 <Text style={styles.itemDetails}>
-                                    {item.quantity} x R${item.price.toFixed(2)}
+                                    {item.quantity} x R${item.priceAtAdding.toFixed(2)}
                                 </Text>
                             </View>
                         </View>
@@ -111,7 +154,7 @@ const CheckoutScreen = () => {
                             styles.paymentOption,
                             selectedPayment === method && styles.selectedOption
                         ]}
-                        onPress={() => setSelectedPayment(method)} // Corrigindo a seleção
+                        onPress={() => setSelectedPayment(method)}
                     >
                         <Icon
                             name={getPaymentIcon(method)}
@@ -137,13 +180,18 @@ const CheckoutScreen = () => {
             </ScrollView>
             <Animated.View style={styles.footer} entering={SlideInDown.duration(500)}>
                 <View style={styles.priceInfoWrapper}>
-                    <Text style={styles.totalTxt}>Total: R${getTotal(cartItems)}</Text>
+                    <Text style={styles.totalTxt}>Total: R${total.toFixed(2)}</Text>
                 </View>
                 <TouchableOpacity
                     style={styles.checkoutBtn}
                     onPress={handlePlaceOrder}
+                    disabled={isLoading}
                 >
-                    <Text style={styles.checkoutBtnTxt}>Place Order</Text>
+                    {isLoading ? (
+                        <ActivityIndicator color={Colors.white} />
+                    ) : (
+                        <Text style={styles.checkoutBtnTxt}>Place Order</Text>
+                    )}
                 </TouchableOpacity>
             </Animated.View>
         </>
@@ -218,6 +266,29 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         flexWrap: 'wrap',
     },
+    paymentOption: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 15,
+        marginBottom: 10,
+        borderWidth: 1,
+        borderColor: Colors.lightGray,
+        borderRadius: 8,
+    },
+    selectedOption: {
+        borderColor: Colors.primary,
+        borderWidth: 2,
+        backgroundColor: Colors.extraLightGray,
+    },
+    paymentText: {
+        fontSize: 16,
+        marginLeft: 15,
+        color: Colors.darkGray,
+        flex: 1,
+    },
+    checkmark: {
+        marginLeft: 'auto',
+    },
     paymentNote: {
         backgroundColor: Colors.transparentWhite,
         borderRadius: 8,
@@ -255,48 +326,47 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     totalTxt: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: Colors.black,
-        flexWrap: 'wrap',
+        fontSize: 16,
+        fontWeight: '500',
+        color: Colors.black
     },
     checkoutBtn: {
         flex: 1,
         backgroundColor: Colors.primary,
-        height: 40,
+        height: 46,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 5
+        borderRadius: 8,
     },
     checkoutBtnTxt: {
         fontSize: 16,
-        fontWeight: '500',
+        fontWeight: '600',
         color: Colors.white
     },
-    paymentOption: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 15,
-        marginVertical: 5,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: Colors.lightGray,
-        backgroundColor: Colors.white,
-    },
-    selectedOption: {
-        borderColor: Colors.primary,
-        backgroundColor: Colors.transparentPrimary,
-        borderWidth: 2,
-    },
-    paymentText: {
-        fontSize: 16,
-        color: Colors.darkGray,
-        marginLeft: 15,
+    emptyContainer: {
         flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: Colors.background,
+        padding: 20,
     },
-    checkmark: {
-        marginLeft: 10,
+    emptyText: {
+        fontSize: 18,
+        color: Colors.gray,
+        fontWeight: '500',
+        marginBottom: 20,
     },
+    continueShoppingBtn: {
+        backgroundColor: Colors.primary,
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        borderRadius: 8,
+    },
+    continueShoppingBtnTxt: {
+        color: Colors.white,
+        fontWeight: '600',
+        fontSize: 16,
+    }
 });
 
-export default CheckoutScreen
+export default CheckoutScreen;

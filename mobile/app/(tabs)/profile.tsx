@@ -62,17 +62,17 @@ const ProfileScreen = (props: Props) => {
   return (
     <>
       <Stack.Screen
-        options={{ headerShown: true, headerTransparent: true, headerTitleAlign: 'center', title: 'Perfil' }}
+        options={{ headerShown: true, headerTransparent: true, headerTitleAlign: 'center', title: 'Profile' }}
       />
       <View style={[styles.container, { marginTop: headerHeight }]}>
         <View style={{ alignItems: "center" }}>
           <Image source={{ uri: user.profileImg || "https://xsgames.co/randomusers/avatar.php?g=male" }} style={styles.profileImg} />
-          <Text style={styles.username}>{user.fullName || "Usuário"}</Text>
+          <Text style={styles.username}>{user.fullName || "User"}</Text>
           <Text style={styles.email}>{user.email}</Text>
         </View>
 
         <ScrollView style={styles.buttonWrapper}>
-          <TouchableOpacity style={styles.button}>
+          <TouchableOpacity style={styles.button} onPress={() => router.push("/orders")}>
             <Ionicons name="person-outline" size={20} color={Colors.black} />
             <Text style={styles.btnText}>Your Orders</Text>
           </TouchableOpacity>
@@ -84,8 +84,8 @@ const ProfileScreen = (props: Props) => {
             <Ionicons name="card-outline" size={20} color={Colors.black} />
             <Text style={styles.btnText}>Payment History</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button}>
-            <Ionicons name="help-circle-outline" size={20} color={Colors.black} />
+          <TouchableOpacity style={styles.button} onPress={() => router.push("/support/chat")}>
+            <Ionicons name="chatbubble-ellipses-outline" size={20} color={Colors.black} />
             <Text style={styles.btnText}>Customer Support</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button}>
