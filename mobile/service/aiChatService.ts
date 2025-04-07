@@ -53,31 +53,26 @@ If you don't know the answer to a specific product question, politely ask for mo
 `;
   }
 
-  async sendMessage(message: string, sessionId?: string): Promise<ChatMessageType> {
+  async sendMessage(message: string, sessionId?: string): Promise<any> {
     try {
       // Get current context data
       let contextData = await this.gatherContextData();
-      
-      if (__DEV__ || !this.apiKey) {
-        console.log("Using mock service: API key is missing");
-        return this.mockSendMessage(message, contextData);
-      }
+    
 
       const payload = {
         contents: [
           {
-            parts: [{ text: this.systemPrompt + this.formatContextData(contextData) }],
-            role: "system"
+            role: "user",
+            parts: [{ text: `${this.systemPrompt}\n\n${this.formatContextData(contextData)}\n\nUser Query: ${message}` }]
           },
-          {
-            parts: [{ text: message }],
-            role: "user"
-          }
         ],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 800,
-        }
+          systemInstruction: {
+            parts: [{ text: this.systemPrompt }]
+          },
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 800,
+          }
       };
 
       console.log("Sending request to Gemini API");
@@ -111,7 +106,6 @@ If you don't know the answer to a specific product question, politely ask for mo
         };
       } else {
         console.error("Unexpected response format from Gemini API:", response.data);
-        return this.mockSendMessage(message, contextData);
       }
     } catch (error) {
       console.error("Error sending message to Gemini:", error);
@@ -129,7 +123,6 @@ If you don't know the answer to a specific product question, politely ask for mo
       }
       
       const contextData = await this.gatherContextData();
-      return this.mockSendMessage(message, contextData);
     }
   }
 
@@ -232,73 +225,6 @@ If you don't know the answer to a specific product question, politely ask for mo
     return formattedData;
   }
 
-  private async mockSendMessage(message: string, contextData: any): Promise<ChatMessageType> {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    let responseContent = "";
-    
-    if (message.toLowerCase().includes("hello") || message.toLowerCase().includes("hi") || 
-        message.toLowerCase().includes("olá") || message.toLowerCase().includes("oi")) {
-      const userName = contextData.user ? contextData.user.fullName : "to ShopX";
-      responseContent = `Hello ${userName}! Welcome to ShopX support. How can I help with your shopping today?`;
-    } else if (message.toLowerCase().includes("entrega") || message.toLowerCase().includes("envio") || 
-               message.toLowerCase().includes("shipping") || message.toLowerCase().includes("delivery")) {
-      responseContent = "At ShopX, we offer standard delivery (3-5 business days) and express delivery (1-2 business days). For international orders, shipping times may vary. You can track your order from your account dashboard once it's shipped.";
-    } else if (message.toLowerCase().includes("preço") || message.toLowerCase().includes("custo") || 
-               message.toLowerCase().includes("price") || message.toLowerCase().includes("cost")) {
-      if (contextData.products && contextData.products.length > 0) {
-        responseContent = `Our pricing is competitive and clearly marked on each product page. For example, some of our popular products include: ${contextData.products.slice(0, 3).map((p: SimpleProductObject) => `${p.title} for $${p.price.toFixed(2)}`).join(', ')}. If you're looking for the best deals, check out our 'Sale' section or sign up for our newsletter to receive exclusive discounts.`;
-      } else {
-        responseContent = "Our pricing is competitive and clearly marked on each product page. If you're looking for the best deals, check out our 'Sale' section or sign up for our newsletter to receive exclusive discounts.";
-      }
-    } else if (message.toLowerCase().includes("devolução") || message.toLowerCase().includes("reembolso") || 
-               message.toLowerCase().includes("troca") || message.toLowerCase().includes("return") || 
-               message.toLowerCase().includes("refund") || message.toLowerCase().includes("exchange")) {
-      responseContent = "ShopX offers a 30-day return policy for unworn/unused items in their original packaging. To initiate a return, go to your order history in your account and select 'Return Items'. Once we receive your return, refunds typically process within 5-7 business days.";
-    } else if (message.toLowerCase().includes("pagamento") || message.toLowerCase().includes("cartão") || 
-               message.toLowerCase().includes("crédito") || message.toLowerCase().includes("payment") || 
-               message.toLowerCase().includes("card") || message.toLowerCase().includes("credit")) {
-      responseContent = "ShopX accepts various payment methods including credit/debit cards, PayPal, Apple Pay, and Google Pay. All transactions are secure and encrypted. If you're experiencing payment issues, please try a different payment method or contact your bank.";
-    } else if (message.toLowerCase().includes("pedido") || message.toLowerCase().includes("compra") || 
-               message.toLowerCase().includes("order") || message.toLowerCase().includes("purchase")) {
-      if (contextData.orders && contextData.orders.length > 0) {
-        const recentOrder = contextData.orders[0];
-        responseContent = `I'd be happy to help with your order. I see that you have a recent order (#${recentOrder.id}) for $${recentOrder.totalAmount.toFixed(2)} with status ${recentOrder.status} from ${recentOrder.createdAt}. Can I help with any specific information about this order?`;
-      } else {
-        responseContent = "I'd be happy to help with your order. To provide specific information, I'll need your order number which can be found in your confirmation email. With that, I can check the status and provide further assistance.";
-      }
-    } else if (message.toLowerCase().includes("tamanho") || message.toLowerCase().includes("size") || 
-               message.toLowerCase().includes("fit")) {
-      responseContent = "ShopX provides detailed size guides on each product page. For clothing items, we recommend checking the specific measurements listed. If you're between sizes, reading customer reviews can often help determine whether to size up or down for a particular item.";
-    } else if (message.toLowerCase().includes("desconto") || message.toLowerCase().includes("cupom") || 
-               message.toLowerCase().includes("promoção") || message.toLowerCase().includes("discount") || 
-               message.toLowerCase().includes("coupon") || message.toLowerCase().includes("promo")) {
-      responseContent = "We regularly offer promotions and discounts! The best way to stay updated on our latest deals is to sign up for our newsletter. Additionally, first-time shoppers can get 10% off by subscribing to our emails. Check our homepage banner for any current promotions.";
-    } else if (message.toLowerCase().includes("carrinho") || message.toLowerCase().includes("cart")) {
-      if (contextData.cartItems && contextData.cartItems.length > 0) {
-        const total = contextData.cartItems.reduce((sum: number, item: CartItemType) => sum + (item.priceAtAdding * item.quantity), 0);
-        responseContent = `Your cart currently contains ${contextData.cartItems.length} item(s) totaling $${total.toFixed(2)}. Items include: ${contextData.cartItems.map((item: CartItemType) => `${item.quantity}x ${item.productTitle}`).join(', ')}. Can I help you complete your purchase or do you have any questions about these products?`;
-      } else {
-        responseContent = "Your cart is currently empty. How about exploring some of our popular categories to find products that might interest you?";
-      }
-    } else if (message.toLowerCase().includes("categoria") || message.toLowerCase().includes("category")) {
-      if (contextData.categories && contextData.categories.length > 0) {
-        responseContent = `ShopX offers several categories for you to explore, including: ${contextData.categories.map((cat: Category) => cat.name).join(', ')}. Which category are you interested in?`;
-      } else {
-        responseContent = "ShopX offers various categories including fashion, electronics, home goods, and accessories. You can browse all categories from the main menu of our app.";
-      }
-    } else {
-      const userName = contextData.user ? `, ${contextData.user.fullName}` : "";
-      responseContent = `Thank you for contacting ShopX customer support${userName}. I'm here to help with any questions about our products, orders, shipping, returns, or payments. For immediate assistance with specific order issues, you can also reach us at (800) 555-1234 or support@shopx.com. Please provide additional details about how I can assist you.`;
-    }
-    
-    return {
-      id: Date.now().toString(),
-      content: responseContent,
-      role: "assistant",
-      timestamp: new Date(),
-    };
-  }
 }
 
 export const aiChatService = new AIChatService(); 

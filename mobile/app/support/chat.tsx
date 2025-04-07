@@ -1,251 +1,306 @@
-import React, { useRef, useState, useEffect } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  FlatList,
-  TouchableOpacity,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  StyleSheet, 
+  ScrollView, 
+  KeyboardAvoidingView, 
+  Platform, 
+  SafeAreaView, 
   ActivityIndicator,
-  Keyboard,
+  Keyboard
 } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '@/constants/Colors';
-import { useChatStore } from '@/store/chatStore';
+import Animated, { SlideInDown } from 'react-native-reanimated';
+import { aiChatService } from '@/service/aiChatService';
 import { ChatMessageType } from '@/service/aiChatService';
-import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Colors } from '@/constants/Colors';
+import InputField from '@/components/InputField';
+import { Stack } from 'expo-router';
+import { useKeyboard } from '@react-native-community/hooks';
+import { Dimensions } from 'react-native';
 
-const ChatSupportScreen = () => {
-  const [message, setMessage] = useState('');
-  const { messages, sendMessage, isLoading, error, clearError } = useChatStore();
-  const flatListRef = useRef<FlatList>(null);
-  const router = useRouter();
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
+const ChatScreen = () => {
+  const [messages, setMessages] = useState<ChatMessageType[]>([]);
+  const [inputText, setInputText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const keyboard = useKeyboard();
+  const { height } = Dimensions.get('window');
 
-  // Monitor keyboard visibility
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      () => {
-        setKeyboardVisible(true);
-        flatListRef.current?.scrollToEnd({ animated: true });
-      }
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      'keyboardDidHide',
-      () => {
-        setKeyboardVisible(false);
-      }
-    );
+  const sendMessage = async (messageContent: string) => {
+    if (!messageContent.trim()) return;
 
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
+    const userMessage: ChatMessageType = {
+      id: Date.now().toString(),
+      content: messageContent,
+      role: 'user',
+      timestamp: new Date()
     };
-  }, []);
-
-  const handleSendMessage = async () => {
-    if (message.trim() === '' || isLoading) return;
     
-    const trimmedMessage = message.trim();
-    setMessage('');
-    await sendMessage(trimmedMessage);
+    setMessages(prev => [...prev, userMessage]);
+    setInputText('');
+    Keyboard.dismiss();
     
-    // Scroll to bottom after sending message
-    setTimeout(() => {
-      flatListRef.current?.scrollToEnd({ animated: true });
-    }, 100);
+    try {
+      setIsLoading(true);
+      const aiResponse = await aiChatService.sendMessage(messageContent);
+      
+      if (aiResponse) {
+        setMessages(prev => [...prev, aiResponse]);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      const errorMessage: ChatMessageType = {
+        id: Date.now().toString(),
+        content: 'Desculpe, ocorreu um erro. Por favor, tente novamente.',
+        role: 'assistant',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const renderMessage = ({ item, index }: { item: ChatMessageType; index: number }) => {
-    const isUser = item.role === 'user';
-    
-    return (
-      <Animated.View 
-        entering={FadeInUp.delay(index * 100).duration(300)}
-        style={[
-          styles.messageContainer,
-          isUser ? styles.userMessage : styles.assistantMessage
-        ]}
-      >
-        <Text style={[styles.messageText, isUser ? styles.userMessageText : styles.assistantMessageText]}>
-          {item.content}
-        </Text>
-        <Text style={styles.timestamp}>
-          {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </Text>
-      </Animated.View>
-    );
-  };
+  const MessageBubble = ({ message }: { message: ChatMessageType }) => (
+    <View style={[
+      styles.messageBubble,
+      message.role === 'user' ? styles.userBubble : styles.aiBubble
+    ]}>
+      <Text style={message.role === 'user' ? styles.userText : styles.aiText}>
+        {message.content}
+      </Text>
+      <Text style={styles.timestamp}>
+        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+      </Text>
+    </View>
+  );
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <>
       <Stack.Screen
-        options={{
-          headerTitle: 'Suporte ao Cliente',
-          headerTitleAlign: 'center',
-          headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-              <Ionicons name="arrow-back" size={24} color={Colors.black} />
-            </TouchableOpacity>
-          ),
-        }}
+        options={{ headerShown: true, headerTransparent: true, headerTitleAlign: 'center', title: 'support' }}
       />
-
-      {error && (
-        <Animated.View 
-          entering={FadeInDown.duration(300)} 
-          style={styles.errorContainer}
+      <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.flex}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
         >
-          <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity onPress={clearError}>
-            <Ionicons name="close-circle" size={20} color={Colors.red} />
-          </TouchableOpacity>
-        </Animated.View>
-      )}
+          <View style={styles.header}>
+            <View>
+              <Text style={styles.headerTitle}>Suporte ShopX</Text>
+              <View style={styles.headerStatus}>
+                <View style={styles.statusIndicator} />
+                <Text style={styles.statusText}>Online agora</Text>
+              </View>
+            </View>
+          </View>
 
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        keyExtractor={(item) => item.id}
-        renderItem={renderMessage}
-        contentContainerStyle={[
-            styles.messagesList, 
-            keyboardVisible && Platform.OS === 'android' ? { paddingBottom: 100 } : {}
-          ]}
-        showsVerticalScrollIndicator={false}
-        onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
-      />
-
-        
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Digite sua mensagem..."
-            placeholderTextColor={Colors.gray}
-            value={message}
-            onChangeText={setMessage}
-            multiline
-            maxLength={500}
-            onSubmitEditing={handleSendMessage}
-            blurOnSubmit={false}
-          />
-          <TouchableOpacity 
-            style={styles.sendButton} 
-            onPress={handleSendMessage}
-            disabled={isLoading || message.trim() === ''}
+          <ScrollView
+            ref={scrollViewRef}
+            contentContainerStyle={[styles.messagesContainer, { 
+              paddingBottom: keyboard.keyboardShown ? height * 0.4 : 140 
+            }]}
+            onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+            keyboardDismissMode="interactive"
           >
-            {isLoading ? (
-              <ActivityIndicator size="small" color={Colors.white} />
-            ) : (
-              <Ionicons name="send" size={20} color={Colors.white} />
+            {messages.map((message) => (
+              <MessageBubble key={message.id} message={message} />
+            ))}
+            
+            {isLoading && (
+              <View style={[styles.messageBubble, styles.aiBubble]}>
+                <ActivityIndicator size="small" color={Colors.primary} />
+              </View>
             )}
-          </TouchableOpacity>
-        </View>
-      
-    </SafeAreaView>
+          </ScrollView>
+
+          <Animated.View 
+            entering={SlideInDown.duration(500)}
+            style={[
+              styles.footer,
+              { bottom: keyboard.keyboardShown ? (Platform.OS === 'ios' ? keyboard.keyboardHeight - 30 : 20) : 60 }
+            ]}
+          >
+            <InputField
+              placeholder="Digite sua mensagem..."
+              value={inputText}
+              onChangeText={setInputText}
+              style={styles.footerInput}
+              multiline
+              onSubmitEditing={() => sendMessage(inputText)}
+              blurOnSubmit={false}
+            />
+            <TouchableOpacity
+              style={[styles.footerButton, !inputText && styles.disabledButton]}
+              onPress={() => sendMessage(inputText)}
+              disabled={!inputText || isLoading}
+            >
+              <Text style={styles.footerButtonText}>Enviar</Text>
+            </TouchableOpacity>
+          </Animated.View>
+
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.semiTransparentWhite,
   },
-  backButton: {
-    marginLeft: 10,
+  flex: {
+    flex: 1,
   },
-  errorContainer: {
+  header: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.extraLightGray,
+    backgroundColor: Colors.solidWhite,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: Colors.black,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
+  },
+  headerStatus: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: Colors.transparentPrimary,
-    marginHorizontal: 16,
-    marginVertical: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.red,
+    marginTop: 4,
   },
-  errorText: {
-    color: Colors.red,
-    flex: 1,
-    fontSize: 13,
+  statusIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.primary,
+    marginRight: 8,
   },
-  messagesList: {
-    paddingHorizontal: 16,
-    paddingBottom: Platform.OS === 'android' ? 20 : 16,
+  statusText: {
+    color: Colors.gray,
+    fontSize: 14,
   },
-  messageContainer: {
+  messagesContainer: {
+    padding: 16,
+    paddingBottom: 24,
+  },
+  messageBubble: {
     maxWidth: '80%',
-    marginVertical: 6,
+    borderRadius: 18,
     padding: 12,
-    borderRadius: 16,
-    elevation: 1,
+    marginBottom: 12,
+    shadowColor: Colors.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 1,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  userMessage: {
+  userBubble: {
     alignSelf: 'flex-end',
     backgroundColor: Colors.primary,
     borderBottomRightRadius: 4,
   },
-  assistantMessage: {
+  aiBubble: {
     alignSelf: 'flex-start',
     backgroundColor: Colors.white,
     borderBottomLeftRadius: 4,
   },
-  messageText: {
-    fontSize: 15,
-    lineHeight: 20,
-  },
-  userMessageText: {
+  userText: {
     color: Colors.white,
+    fontSize: 16,
   },
-  assistantMessageText: {
+  aiText: {
     color: Colors.black,
+    fontSize: 16,
   },
   timestamp: {
     fontSize: 10,
+    color: Colors.lightGray,
     marginTop: 4,
     alignSelf: 'flex-end',
-    opacity: 0.7,
-    color: Colors.extraLightGray,
   },
   inputContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: Platform.OS === 'android' ? 8 : 12,
-    backgroundColor: Colors.white,
     alignItems: 'center',
+    padding: 12,
+    backgroundColor: Colors.solidWhite,
     borderTopWidth: 1,
     borderTopColor: Colors.extraLightGray,
-    marginBottom: 55,
   },
-  input: {
+  chatInput: {
     flex: 1,
-    backgroundColor: Colors.background,
+    minHeight: 40,
+    maxHeight: 120,
     borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: Platform.OS === 'android' ? 8 : 10,
     marginRight: 12,
-    maxHeight: 80,
-    color: Colors.black,
+    backgroundColor: Colors.background,
+    borderColor: Colors.extraLightGray,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
   },
   sendButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 18,
+    backgroundColor: Colors.extraLightGray,
+  },
+  activeSendButton: {
     backgroundColor: Colors.primary,
-    width: Platform.OS === 'android' ? 36 : 40,
-    height: Platform.OS === 'android' ? 36 : 40,
-    borderRadius: Platform.OS === 'android' ? 18 : 20,
-    justifyContent: 'center',
+  },
+  sendButtonText: {
+    color: Colors.white,
+    fontWeight: '500',
+  },
+  footer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    padding: 12, 
+    backgroundColor: Colors.white,
+    borderTopWidth: 1,
+    borderTopColor: Colors.extraLightGray,
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
+    shadowColor: Colors.black,
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  footerInput: {
+    flex: 1,
+    minHeight: 40, 
+    maxHeight: 100,
+    backgroundColor: Colors.background,
+    borderRadius: 15,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    fontSize: 16,
+    textAlignVertical: 'center', 
+    marginTop:12
+  },
+  footerButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    height: 40, 
+    justifyContent: 'center',
+    alignItems: 'center', 
+  },
+  
+  footerButtonText: {
+    color: Colors.white,
+    fontWeight: '500',
+    fontSize: 16,
+  },
+  disabledButton: {
+    backgroundColor: Colors.lightGray,
   },
 });
 
-export default ChatSupportScreen; 
+export default ChatScreen;
