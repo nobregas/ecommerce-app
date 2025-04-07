@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  StyleSheet, 
-  ScrollView, 
-  KeyboardAvoidingView, 
-  Platform, 
-  SafeAreaView, 
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
   ActivityIndicator,
   Keyboard
 } from 'react-native';
@@ -37,15 +37,15 @@ const ChatScreen = () => {
       role: 'user',
       timestamp: new Date()
     };
-    
+
     setMessages(prev => [...prev, userMessage]);
     setInputText('');
     Keyboard.dismiss();
-    
+
     try {
       setIsLoading(true);
       const aiResponse = await aiChatService.sendMessage(messageContent);
-      
+
       if (aiResponse) {
         setMessages(prev => [...prev, aiResponse]);
       }
@@ -61,6 +61,13 @@ const ChatScreen = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const initialWelcomeMessage: ChatMessageType = {
+    id: 'welcome',
+    content: 'Olá! Sou a assistente virtual da ShopX. Como posso ajudar você hoje?',
+    role: 'assistant',
+    timestamp: new Date()
   };
 
   const MessageBubble = ({ message }: { message: ChatMessageType }) => (
@@ -100,16 +107,20 @@ const ChatScreen = () => {
 
           <ScrollView
             ref={scrollViewRef}
-            contentContainerStyle={[styles.messagesContainer, { 
-              paddingBottom: keyboard.keyboardShown ? height * 0.4 : 140 
+            contentContainerStyle={[styles.messagesContainer, {
+              paddingBottom: keyboard.keyboardShown ? height * 0.4 : 140
             }]}
             onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
             keyboardDismissMode="interactive"
           >
-            {messages.map((message) => (
-              <MessageBubble key={message.id} message={message} />
-            ))}
-            
+            {messages.length === 0 ? (
+              <MessageBubble message={initialWelcomeMessage} />
+            ) : (
+              messages.map((message) => (
+                <MessageBubble key={message.id} message={message} />
+              ))
+            )}
+
             {isLoading && (
               <View style={[styles.messageBubble, styles.aiBubble]}>
                 <ActivityIndicator size="small" color={Colors.primary} />
@@ -117,7 +128,7 @@ const ChatScreen = () => {
             )}
           </ScrollView>
 
-          <Animated.View 
+          <Animated.View
             entering={SlideInDown.duration(500)}
             style={[
               styles.footer,
@@ -259,7 +270,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    padding: 12, 
+    padding: 12,
     backgroundColor: Colors.white,
     borderTopWidth: 1,
     borderTopColor: Colors.extraLightGray,
@@ -274,25 +285,25 @@ const styles = StyleSheet.create({
   },
   footerInput: {
     flex: 1,
-    minHeight: 40, 
+    minHeight: 40,
     maxHeight: 100,
     backgroundColor: Colors.background,
     borderRadius: 15,
     paddingHorizontal: 15,
     paddingVertical: 10,
     fontSize: 16,
-    textAlignVertical: 'center', 
-    marginTop:12
+    textAlignVertical: 'center',
+    marginTop: 12
   },
   footerButton: {
     backgroundColor: Colors.primary,
     borderRadius: 20,
     paddingHorizontal: 20,
-    height: 40, 
+    height: 40,
     justifyContent: 'center',
-    alignItems: 'center', 
+    alignItems: 'center',
   },
-  
+
   footerButtonText: {
     color: Colors.white,
     fontWeight: '500',
