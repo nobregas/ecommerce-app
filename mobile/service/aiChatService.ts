@@ -30,8 +30,8 @@ export class AIChatService implements IAIChatService {
   private systemPrompt: string;
   
   constructor() {
-    this.apiKey = "AIzaSyDJWUqdPHosEDZ3jT5r2chrZPd0sRPe2aM";
-    this.baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+    this.apiKey = GEMINIKEY;
+    this.baseUrl = GEMINIMODELURL;
     
     this.systemPrompt = `
 You are a helpful customer support assistant for an e-commerce app called ShopX.
