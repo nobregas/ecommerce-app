@@ -132,7 +132,7 @@ const ChatScreen = () => {
             entering={SlideInDown.duration(500)}
             style={[
               styles.footer,
-              { bottom: keyboard.keyboardShown ? (Platform.OS === 'ios' ? keyboard.keyboardHeight - 30 : 20) : 60 }
+              { bottom: keyboard.keyboardShown ? (Platform.OS === 'ios' ? keyboard.keyboardHeight - 30 : 20) : 0 }
             ]}
           >
             <InputField
